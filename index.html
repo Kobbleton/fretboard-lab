@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open Tunings Fretboard</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero">
+        <p class="eyebrow">Open Tunings Charts</p>
+        <h1>Гриф для своих строёв</h1>
+        <p class="hero-copy">
+          Статическая страница без canvas: гриф собирается из обычной вёрстки, а
+          ноты рассчитываются в браузере из строя и хроматической последовательности.
+        </p>
+      </section>
+
+      <section class="fretboard-page" aria-label="Интерактивный гитарный гриф">
+        <div class="controls" id="controls"></div>
+        <div class="guitar-wrap">
+          <div class="guitar right-handed" id="guitar"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app-i18n.js"></script>
+  </body>
+</html>
