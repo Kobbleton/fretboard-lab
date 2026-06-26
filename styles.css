@@ -71,6 +71,28 @@ select {
   text-transform: uppercase;
 }
 
+.eyebrow-button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.eyebrow-button:hover {
+  color: #a9edf8;
+  transform: translateY(-1px);
+}
+
 .hero h1 {
   margin: 0;
   max-width: 980px;
@@ -277,6 +299,12 @@ select {
   overflow-x: auto;
   overflow-y: visible;
   padding: 0 0 72px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.guitar-wrap::-webkit-scrollbar {
+  display: none;
 }
 
 .controls {
@@ -304,6 +332,33 @@ select {
 .control-card h2 {
   margin: 0 0 14px;
   font-size: 1rem;
+}
+
+.control-card-header {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.control-card-header h2 {
+  margin: 0;
+}
+
+.control-card-copy {
+  margin: 0;
+  max-width: 44ch;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.control-section-label {
+  margin: 2px 0 10px;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .control-card p,
@@ -364,6 +419,10 @@ select {
 .small-copy {
   margin: 12px 0 0;
   font-size: 0.92rem;
+}
+
+.small-copy--tight {
+  margin-top: -2px;
 }
 
 .scale-grid,
@@ -436,8 +495,14 @@ select {
   box-shadow: 0 0 0 3px rgba(118, 209, 231, 0.12);
 }
 
+.field-row select:disabled,
+.field-row input:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
 #custom-actions {
-  margin-top: 16px;
+  margin-top: 4px;
 }
 
 .custom-grid button {
@@ -461,7 +526,7 @@ select {
 .saved-tunings-section {
   display: grid;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .saved-tunings-header {
@@ -657,6 +722,15 @@ select {
 
 .fret.is-capo-muted {
   background: linear-gradient(180deg, rgba(3, 12, 16, 0.46), rgba(3, 12, 16, 0.38));
+}
+
+.fret.is-out-of-range {
+  opacity: 0.42;
+}
+
+.fret.is-out-of-range::after,
+.fret.is-out-of-range .double-marker::after {
+  opacity: 0.32;
 }
 
 .guitar.left-handed .nut {

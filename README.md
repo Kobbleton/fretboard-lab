@@ -17,6 +17,9 @@ It was built as a practical everyday tool for exploring alternate tunings, scale
 - saved tuning library
 - scale highlighting
 - interval display mode
+- chord mode
+- fret-range focus mode
+- scale-degree note coloring
 - capo control
 - sharp/flat note naming
 - right-handed and left-handed orientation
@@ -65,7 +68,7 @@ http://127.0.0.1:4173/index.html
 
 - `index.html` - page shell
 - `styles.css` - UI, fretboard, responsive layout
-- `app-i18n.js` - fretboard logic, controls, translations, rendering
+- `app-main.js` - fretboard logic, controls, translations, rendering
 - `favicon.svg` - app favicon
 - `launch-open-tunings.ps1` - local server launcher
 
@@ -82,12 +85,12 @@ http://127.0.0.1:4173/index.html
 
 ### v1.2 - Music Workflow Features
 
-- [ ] Add chord mode
-- [ ] Add user presets
-- [ ] Add fret-range focus mode
+- [x] Add chord mode
+- [x] Add user presets
+- [x] Add fret-range focus mode
 - [ ] Add side-by-side tuning comparison
-- [ ] Color notes by scale degree
-- [ ] Expand built-in tuning preset library
+- [x] Color notes by scale degree
+- [x] Expand built-in tuning preset library
 
 ### v2.0 - Practice & Expansion
 

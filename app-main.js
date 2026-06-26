@@ -37,13 +37,22 @@ const NOTE_TO_SEMITONE = {
 
 const PRESET_TUNINGS = [
   { id: "standard", label: "Standard", notes: ["E", "A", "D", "G", "B", "E"], octaves: ["E2", "A2", "D3", "G3", "B3", "E4"] },
+  { id: "half-step-down", label: "Half Step Down", notes: ["Eb", "Ab", "Db", "Gb", "Bb", "Eb"], octaves: ["Eb2", "Ab2", "Db3", "Gb3", "Bb3", "Eb4"] },
   { id: "drop-d", label: "Drop D", notes: ["D", "A", "D", "G", "B", "E"], octaves: ["D2", "A2", "D3", "G3", "B3", "E4"] },
+  { id: "d-standard", label: "D Standard", notes: ["D", "G", "C", "F", "A", "D"], octaves: ["D2", "G2", "C3", "F3", "A3", "D4"] },
+  { id: "c-standard", label: "C Standard", notes: ["C", "F", "Bb", "Eb", "G", "C"], octaves: ["C2", "F2", "Bb2", "Eb3", "G3", "C4"] },
+  { id: "b-standard", label: "B Standard", notes: ["B", "E", "A", "D", "F#", "B"], octaves: ["B1", "E2", "A2", "D3", "F#3", "B3"] },
   { id: "open-g", label: "Open G", notes: ["D", "G", "D", "G", "B", "D"], octaves: ["D2", "G2", "D3", "G3", "B3", "D4"] },
+  { id: "open-d", label: "Open D", notes: ["D", "A", "D", "F#", "A", "D"], octaves: ["D2", "A2", "D3", "F#3", "A3", "D4"] },
+  { id: "open-e", label: "Open E", notes: ["E", "B", "E", "G#", "B", "E"], octaves: ["E2", "B2", "E3", "G#3", "B3", "E4"] },
+  { id: "open-a", label: "Open A", notes: ["E", "A", "E", "A", "C#", "E"], octaves: ["E2", "A2", "E3", "A3", "C#4", "E4"] },
   { id: "dadgad", label: "DADGAD", notes: ["D", "A", "D", "G", "A", "D"], octaves: ["D2", "A2", "D3", "G3", "A3", "D4"] },
   { id: "drop-c", label: "Drop C", notes: ["C", "G", "C", "F", "A", "D"], octaves: ["C2", "G2", "C3", "F3", "A3", "D4"] },
   { id: "open-c", label: "Open C", notes: ["C", "G", "C", "G", "C", "E"], octaves: ["C2", "G2", "C3", "G3", "C4", "E4"] },
   { id: "facgce", label: "FACGCE", notes: ["F", "A", "C", "G", "C", "E"], octaves: ["F2", "A2", "C3", "G3", "C4", "E4"] },
   { id: "double-drop-d", label: "Double Drop D", notes: ["D", "A", "D", "G", "B", "D"], octaves: ["D2", "A2", "D3", "G3", "B3", "D4"] },
+  { id: "new-standard", label: "New Standard", notes: ["C", "G", "D", "A", "E", "G"], octaves: ["C2", "G2", "D3", "A3", "E4", "G4"] },
+  { id: "nashville", label: "Nashville", notes: ["E", "A", "D", "G", "B", "E"], octaves: ["E3", "A3", "D4", "G4", "B3", "E4"] },
 ];
 
 const SCALE_PATTERNS = {
@@ -60,6 +69,18 @@ const SCALE_PATTERNS = {
   minorPentatonic: { intervals: [0, 3, 5, 7, 10], labels: { en: "Minor Pentatonic" } },
 };
 
+const CHORD_PATTERNS = {
+  major: { intervals: [0, 4, 7], labels: { en: "Major" } },
+  minor: { intervals: [0, 3, 7], labels: { en: "Minor" } },
+  dominant7: { intervals: [0, 4, 7, 10], labels: { en: "Dominant 7" } },
+  major7: { intervals: [0, 4, 7, 11], labels: { en: "Major 7" } },
+  minor7: { intervals: [0, 3, 7, 10], labels: { en: "Minor 7" } },
+  sus2: { intervals: [0, 2, 7], labels: { en: "Sus 2" } },
+  sus4: { intervals: [0, 5, 7], labels: { en: "Sus 4" } },
+  diminished: { intervals: [0, 3, 6], labels: { en: "Diminished" } },
+  augmented: { intervals: [0, 4, 8], labels: { en: "Augmented" } },
+};
+
 const LANGUAGES = [
   { id: "en", label: "English" },
   { id: "uk", label: "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430" },
@@ -70,9 +91,13 @@ const LANGUAGES = [
 const I18N = {
   en: {
     documentTitle: "Open Tunings Fretboard",
-    heroTitle: "Fretboard for your tunings",
+    heroTitle: "Explore your tuning on the neck",
     fretboardAria: "Interactive guitar fretboard",
+    homeButton: "Open Tunings Charts",
     sectionTunings: "Tunings",
+    sectionTuningsHelp: "Switch presets, save your own setups, or type a fresh six-string tuning.",
+    presetsLabel: "Presets",
+    customTuningSection: "Custom tuning",
     tuningsHelp: "Pick a preset tuning, save your own versions, or enter a six-string setup manually.",
     customLabel: "Tuning name",
     customLabelPlaceholder: "For example: FACGCE",
@@ -89,24 +114,48 @@ const I18N = {
     sectionMode: "Highlight mode",
     sectionNotes: "Note highlight",
     sectionScale: "Scale",
+    sectionChordHelp: "Pick a chord root and shape so you can isolate its tones across the neck.",
+    sectionScaleHelp: "Choose a scale root and pattern to reveal the matching notes instantly.",
+    sectionModeHelp: "Decide which note set the fretboard should show right now.",
+    sectionNotesHelp: "Build a custom note filter by hand when you want a specific note collection.",
+    sectionDisplayHelp: "Change labels, colors, layout, capo, and export settings.",
+    sectionFocusHelp: "Limit the visible area to a hand position or a custom fret range.",
     noteNamingLabel: "Note labels",
     noteDisplayLabel: "Display mode",
     displayNotes: "Notes",
     displayIntervals: "Intervals",
+    noteColorLabel: "Color mode",
+    colorChromatic: "Chromatic",
+    colorDegree: "Scale degree",
     highlightModeLabel: "Highlight mode",
     handednessLabel: "Orientation",
     inlayStyleLabel: "Inlays",
     fretLayoutLabel: "Fret spacing",
     scaleLengthLabel: "Scale length",
     fretCountLabel: "Frets",
+    fretRangeLabel: "Fret focus",
+    fretRangeStartLabel: "From fret",
+    fretRangeEndLabel: "To fret",
+    fretFocusOff: "Off",
+    fretFocusPosition: "Position",
+    fretFocusCustom: "Custom",
+    fretFocusReset: "Reset",
+    fretFocusPositionLabel: "Position",
+    fretFocusSummaryOff: "Full neck is visible.",
+    fretFocusSummaryPosition: ({ start, end }) => `Position focus shows frets ${start}-${end}.`,
+    fretFocusSummaryCustom: ({ start, end }) => `Custom focus shows frets ${start}-${end}.`,
     capoLabel: "Capo",
     exportPng: "Export PNG",
+    sectionChord: "Chord",
+    chordRootLabel: "Root",
+    chordTypeLabel: "Chord type",
     capoBadge: ({ capo }) => `Capo ${capo}`,
     namingFlats: "\u266d Flats",
     namingSharps: "\u266f Sharps",
     highlightAll: "All",
     highlightCustom: "Selected",
     highlightScale: "Scale",
+    highlightChord: "Chord",
     handednessRight: "Right-handed",
     handednessLeft: "Left-handed",
     inlayDots: "Dots",
@@ -119,6 +168,7 @@ const I18N = {
     scaleRootLabel: "Root",
     scaleTypeLabel: "Scale type",
     customTuningDefault: "Custom tuning",
+    chordSummary: ({ root, label, notes }) => `${root} ${label}: ${notes}`,
     msgPresetApplied: ({ preset }) => `Tuning "${preset}" is active.`,
     msgCustomApplied: ({ label }) => `Tuning "${label}" is applied.`,
     msgTuningSaved: ({ label }) => `Saved tuning "${label}" is ready to reuse.`,
@@ -298,6 +348,7 @@ const state = {
   visibleNotes: [...NOTE_NAMES_SHARP],
   noteNaming: "sharps",
   noteDisplayMode: "notes",
+  noteColorMode: "chromatic",
   handedness: "right",
   inlayStyle: "dots",
   fretLayout: "chart",
@@ -307,6 +358,12 @@ const state = {
   highlightMode: "all",
   selectedScaleRoot: "C",
   selectedScaleType: "major",
+  selectedChordRoot: "C",
+  selectedChordType: "major",
+  fretFocusMode: "off",
+  fretFocusPosition: 1,
+  fretRangeStart: 1,
+  fretRangeEnd: 13,
   savedTunings: [],
   tuningDraftLabel: defaultTuning.label,
   tuningDraftNotesText: defaultTuning.octaves.join(" "),
@@ -445,6 +502,43 @@ function syncDraftFromCurrentTuning() {
   state.tuningDraftNotesText = state.tuningOctaves.join(" ");
 }
 
+function resetAppView() {
+  const preservedLanguage = state.language;
+  const preservedSavedTunings = [...state.savedTunings];
+  state.language = preservedLanguage;
+  state.languageMenuOpen = false;
+  state.tuningName = defaultTuning.label;
+  state.tuningId = defaultTuning.id;
+  state.tuningNotes = [...defaultTuning.notes];
+  state.tuningOctaves = [...defaultTuning.octaves];
+  state.visibleNotes = [...NOTE_NAMES_SHARP];
+  state.noteNaming = "sharps";
+  state.noteDisplayMode = "notes";
+  state.noteColorMode = "chromatic";
+  state.handedness = "right";
+  state.inlayStyle = "dots";
+  state.fretLayout = "chart";
+  state.scaleLength = 25.5;
+  state.fretCount = 13;
+  state.capo = 0;
+  state.highlightMode = "all";
+  state.selectedScaleRoot = "C";
+  state.selectedScaleType = "major";
+  state.selectedChordRoot = "C";
+  state.selectedChordType = "major";
+  state.fretFocusMode = "off";
+  state.fretFocusPosition = 1;
+  state.fretRangeStart = 1;
+  state.fretRangeEnd = 13;
+  state.savedTunings = preservedSavedTunings;
+  state.messageKey = "";
+  state.messageType = "";
+  state.messageParams = {};
+  state.inlineMessageText = "";
+  state.inlineMessageType = "";
+  syncDraftFromCurrentTuning();
+}
+
 function normalizeTuningTokens(tokens, mode) {
   if (tokens.length !== 6) {
     throw new Error(t("errorNeedSixNotes"));
@@ -521,6 +615,7 @@ function saveState() {
     visibleNotes: state.visibleNotes,
     noteNaming: state.noteNaming,
     noteDisplayMode: state.noteDisplayMode,
+    noteColorMode: state.noteColorMode,
     handedness: state.handedness,
     inlayStyle: state.inlayStyle,
     fretLayout: state.fretLayout,
@@ -530,6 +625,12 @@ function saveState() {
     highlightMode: state.highlightMode,
     selectedScaleRoot: state.selectedScaleRoot,
     selectedScaleType: state.selectedScaleType,
+    selectedChordRoot: state.selectedChordRoot,
+    selectedChordType: state.selectedChordType,
+    fretFocusMode: state.fretFocusMode,
+    fretFocusPosition: state.fretFocusPosition,
+    fretRangeStart: state.fretRangeStart,
+    fretRangeEnd: state.fretRangeEnd,
     savedTunings: state.savedTunings,
     tuningDraftLabel: state.tuningDraftLabel,
     tuningDraftNotesText: state.tuningDraftNotesText,
@@ -573,6 +674,9 @@ function applySnapshot(parsed) {
   if (typeof parsed.noteDisplayMode === "string" && ["notes", "intervals"].includes(parsed.noteDisplayMode)) {
     state.noteDisplayMode = parsed.noteDisplayMode;
   }
+  if (typeof parsed.noteColorMode === "string" && ["chromatic", "degree"].includes(parsed.noteColorMode)) {
+    state.noteColorMode = parsed.noteColorMode;
+  }
   if (typeof parsed.handedness === "string" && ["right", "left"].includes(parsed.handedness)) {
     state.handedness = parsed.handedness;
   }
@@ -591,7 +695,7 @@ function applySnapshot(parsed) {
   if (typeof parsed.capo === "number" && parsed.capo >= 0 && parsed.capo <= 12) {
     state.capo = parsed.capo;
   }
-  if (typeof parsed.highlightMode === "string" && ["all", "custom", "scale"].includes(parsed.highlightMode)) {
+  if (typeof parsed.highlightMode === "string" && ["all", "custom", "scale", "chord"].includes(parsed.highlightMode)) {
     state.highlightMode = parsed.highlightMode;
   }
   if (typeof parsed.selectedScaleType === "string" && SCALE_PATTERNS[parsed.selectedScaleType]) {
@@ -599,6 +703,24 @@ function applySnapshot(parsed) {
   }
   if (typeof parsed.selectedScaleRoot === "string") {
     state.selectedScaleRoot = normalizeNoteName(parsed.selectedScaleRoot, state.noteNaming);
+  }
+  if (typeof parsed.selectedChordType === "string" && CHORD_PATTERNS[parsed.selectedChordType]) {
+    state.selectedChordType = parsed.selectedChordType;
+  }
+  if (typeof parsed.selectedChordRoot === "string") {
+    state.selectedChordRoot = normalizeNoteName(parsed.selectedChordRoot, state.noteNaming);
+  }
+  if (typeof parsed.fretFocusMode === "string" && ["off", "position", "custom"].includes(parsed.fretFocusMode)) {
+    state.fretFocusMode = parsed.fretFocusMode;
+  }
+  if (typeof parsed.fretFocusPosition === "number" && parsed.fretFocusPosition >= 1) {
+    state.fretFocusPosition = parsed.fretFocusPosition;
+  }
+  if (typeof parsed.fretRangeStart === "number" && parsed.fretRangeStart >= 1) {
+    state.fretRangeStart = parsed.fretRangeStart;
+  }
+  if (typeof parsed.fretRangeEnd === "number" && parsed.fretRangeEnd >= 1) {
+    state.fretRangeEnd = parsed.fretRangeEnd;
   }
   if (Array.isArray(parsed.visibleNotes)) {
     state.visibleNotes = parsed.visibleNotes.map((note) => normalizeNoteName(note, state.noteNaming));
@@ -688,7 +810,90 @@ function getScaleNotes(root, scaleType, mode) {
   return pattern.intervals.map((interval) => getChromaticScale(mode)[(rootSemitone + interval) % 12]);
 }
 
+function getChordLabel(chordType) {
+  const chord = CHORD_PATTERNS[chordType];
+  if (!chord) {
+    return chordType;
+  }
+  return chord.labels[state.language] || chord.labels.en || chordType;
+}
+
+function getChordNotes(root, chordType, mode) {
+  const pattern = CHORD_PATTERNS[chordType];
+  if (!pattern) {
+    return [];
+  }
+  const rootSemitone = NOTE_TO_SEMITONE[normalizeNoteName(root, mode)];
+  return pattern.intervals.map((interval) => getChromaticScale(mode)[(rootSemitone + interval) % 12]);
+}
+
+function getActiveRootNote() {
+  return state.highlightMode === "chord" ? state.selectedChordRoot : state.selectedScaleRoot;
+}
+
+function getCurrentNoteSet() {
+  if (state.highlightMode === "chord") {
+    return getChordNotes(state.selectedChordRoot, state.selectedChordType, state.noteNaming);
+  }
+  if (state.highlightMode === "scale") {
+    return getScaleNotes(state.selectedScaleRoot, state.selectedScaleType, state.noteNaming);
+  }
+  if (state.highlightMode === "all") {
+    return getChromaticScale(state.noteNaming);
+  }
+  return state.visibleNotes.map((note) => normalizeNoteName(note, state.noteNaming));
+}
+
+function getMaxRenderableFretCount() {
+  return getRenderableFretCount();
+}
+
+function applyFocusPositionRange() {
+  const maxFret = getMaxRenderableFretCount();
+  const start = Math.min(Math.max(1, state.fretFocusPosition), maxFret);
+  state.fretFocusPosition = start;
+  state.fretRangeStart = start;
+  state.fretRangeEnd = Math.min(start + 3, maxFret);
+}
+
+function resetFretFocus() {
+  state.fretFocusMode = "off";
+  state.fretFocusPosition = 1;
+  state.fretRangeStart = 1;
+  state.fretRangeEnd = getMaxRenderableFretCount();
+}
+
+function clampFretRange() {
+  const maxFret = getRenderableFretCount();
+  if (state.fretFocusMode === "off") {
+    state.fretRangeStart = 1;
+    state.fretRangeEnd = maxFret;
+    return;
+  }
+  if (state.fretFocusMode === "position") {
+    applyFocusPositionRange();
+    return;
+  }
+  state.fretRangeStart = Math.min(Math.max(1, state.fretRangeStart), maxFret);
+  state.fretRangeEnd = Math.min(Math.max(1, state.fretRangeEnd), maxFret);
+  if (state.fretRangeStart > state.fretRangeEnd) {
+    state.fretRangeEnd = state.fretRangeStart;
+  }
+}
+
+function isFretInRange(fretIndex) {
+  if (state.fretFocusMode === "off") {
+    return true;
+  }
+  return fretIndex >= state.fretRangeStart && fretIndex <= state.fretRangeEnd;
+}
+
 function syncVisibleNotesForMode() {
+  clampFretRange();
+  if (state.highlightMode === "chord") {
+    state.visibleNotes = getChordNotes(state.selectedChordRoot, state.selectedChordType, state.noteNaming);
+    return;
+  }
   if (state.highlightMode === "all") {
     state.visibleNotes = [...getChromaticScale(state.noteNaming)];
     return;
@@ -709,6 +914,7 @@ function updateNoteNaming(mode) {
     return `${normalizeNoteName(noteName, mode)}${octave}`;
   });
   state.selectedScaleRoot = normalizeNoteName(state.selectedScaleRoot, mode);
+  state.selectedChordRoot = normalizeNoteName(state.selectedChordRoot, mode);
   state.savedTunings = state.savedTunings.map((tuning) => ({
     ...tuning,
     notes: tuning.notes.map((note) => normalizeNoteName(note, mode)),
@@ -765,19 +971,31 @@ function getIntervalLabel(noteName, root, mode) {
   return INTERVAL_LABELS[(noteSemitone - rootSemitone + 12) % 12];
 }
 
+function getNoteHue(noteName, rootNote = getActiveRootNote()) {
+  if (state.noteColorMode !== "degree") {
+    return null;
+  }
+  const noteSemitone = NOTE_TO_SEMITONE[normalizeNoteName(noteName, state.noteNaming)];
+  const rootSemitone = NOTE_TO_SEMITONE[normalizeNoteName(rootNote, state.noteNaming)];
+  return ((noteSemitone - rootSemitone + 12) % 12) * 30;
+}
+
 function shouldHighlightRoot(noteName) {
   const normalized = normalizeNoteName(noteName, state.noteNaming);
-  const root = normalizeNoteName(state.selectedScaleRoot, state.noteNaming);
-  return (state.noteDisplayMode === "intervals" || state.highlightMode === "scale") && normalized === root;
+  const root = normalizeNoteName(getActiveRootNote(), state.noteNaming);
+  return (state.noteDisplayMode === "intervals" || state.highlightMode === "scale" || state.highlightMode === "chord") && normalized === root;
 }
 
 function isNoteVisible(noteName) {
+  if (state.highlightMode === "chord") {
+    return getCurrentNoteSet().includes(noteName);
+  }
   return state.highlightMode === "all" ? true : state.visibleNotes.includes(noteName);
 }
 
 function getDisplayHtml(noteName) {
   if (state.noteDisplayMode === "intervals") {
-    return formatLabelWithAccidentals(getIntervalLabel(noteName, state.selectedScaleRoot, state.noteNaming));
+    return formatLabelWithAccidentals(getIntervalLabel(noteName, getActiveRootNote(), state.noteNaming));
   }
   return formatLabelWithAccidentals(noteName);
 }
@@ -795,8 +1013,9 @@ function getFretboardNotes(tuningOctaves, fretCount, mode) {
         displayHtml: getDisplayHtml(noteName),
         stringIndex,
         fretIndex: fret,
-        isVisible: isNoteVisible(noteName),
+        isVisible: isNoteVisible(noteName) && isFretInRange(fret),
         isRoot: shouldHighlightRoot(noteName),
+        hue: getNoteHue(noteName),
       });
     }
     return notes;
@@ -890,12 +1109,16 @@ function renderHero() {
   }
   heroNode.innerHTML = `
     <div class="hero-topbar">
-      <p class="eyebrow">Open Tunings Charts</p>
+      <button type="button" class="eyebrow-button" id="home-button">${escapeHtml(t("homeButton"))}</button>
       <div class="desktop-language-slot"></div>
     </div>
     <h1 id="hero-title">${escapeHtml(t("heroTitle"))}</h1>
     <div class="status-toast-wrap"></div>
   `;
+  heroNode.querySelector("#home-button")?.addEventListener("click", () => {
+    resetAppView();
+    render();
+  });
   heroNode.querySelector(".desktop-language-slot")?.appendChild(buildLanguageSwitcher("language-switcher--desktop"));
   renderToast(heroNode.querySelector(".status-toast-wrap"));
 }
@@ -953,6 +1176,29 @@ function buildSavedTuningsMarkup() {
     .join("");
 }
 
+function buildCardHeader(title, copy) {
+  return `
+    <div class="control-card-header">
+      <h2>${escapeHtml(title)}</h2>
+      <p class="control-card-copy">${escapeHtml(copy)}</p>
+    </div>
+  `;
+}
+
+function buildSectionLabel(text) {
+  return `<div class="control-section-label">${escapeHtml(text)}</div>`;
+}
+
+function getFretFocusSummary() {
+  if (state.fretFocusMode === "position") {
+    return t("fretFocusSummaryPosition", { start: state.fretRangeStart, end: state.fretRangeEnd });
+  }
+  if (state.fretFocusMode === "custom") {
+    return t("fretFocusSummaryCustom", { start: state.fretRangeStart, end: state.fretRangeEnd });
+  }
+  return t("fretFocusSummaryOff");
+}
+
 function renderControls() {
   controlsNode.innerHTML = "";
   const availableFretCounts = getAvailableFretCounts();
@@ -965,14 +1211,14 @@ function renderControls() {
   const noteCard = document.createElement("section");
   noteCard.className = "control-card control-card--wide control-card--note";
   noteCard.innerHTML = `
-    <h2>${escapeHtml(t("sectionNotes"))}</h2>
+    ${buildCardHeader(t("sectionNotes"), t("sectionNotesHelp"))}
     <div class="chip-row" id="note-chip-row"></div>
   `;
 
   const scaleCard = document.createElement("section");
   scaleCard.className = "control-card control-card--half control-card--scale";
   scaleCard.innerHTML = `
-    <h2>${escapeHtml(t("sectionScale"))}</h2>
+    ${buildCardHeader(t("sectionScale"), t("sectionScaleHelp"))}
     <div class="scale-grid">
       <div class="field-row">
         <label for="scale-root">${escapeHtml(t("scaleRootLabel"))}</label>
@@ -986,13 +1232,29 @@ function renderControls() {
     <p class="small-copy" id="scale-summary"></p>
   `;
 
+  const chordCard = document.createElement("section");
+  chordCard.className = "control-card control-card--half control-card--chord";
+  chordCard.innerHTML = `
+    ${buildCardHeader(t("sectionChord"), t("sectionChordHelp"))}
+    <div class="scale-grid">
+      <div class="field-row">
+        <label for="chord-root">${escapeHtml(t("chordRootLabel"))}</label>
+        <select id="chord-root" name="chord-root"></select>
+      </div>
+      <div class="field-row">
+        <label for="chord-type">${escapeHtml(t("chordTypeLabel"))}</label>
+        <select id="chord-type" name="chord-type"></select>
+      </div>
+    </div>
+    <p class="small-copy" id="chord-summary"></p>
+  `;
+
   const modeCard = document.createElement("section");
   modeCard.className = "control-card control-card--half control-card--mode";
   modeCard.innerHTML = `
-    <h2>${escapeHtml(t("sectionMode"))}</h2>
+    ${buildCardHeader(t("sectionMode"), t("sectionModeHelp"))}
     <div class="card-stack">
       <div class="field-row field-row--full">
-        <span>${escapeHtml(t("highlightModeLabel"))}</span>
         <div class="toggle-row" id="highlight-mode-row"></div>
       </div>
       <div class="field-row field-row--full field-row--actions">
@@ -1011,10 +1273,39 @@ function renderControls() {
     </div>
   `;
 
+  const focusCard = document.createElement("section");
+  focusCard.className = "control-card control-card--half control-card--focus";
+  focusCard.innerHTML = `
+    ${buildCardHeader(t("fretRangeLabel"), t("sectionFocusHelp"))}
+    <div class="card-stack">
+      <div class="field-row field-row--full">
+        <div class="toggle-row" id="focus-mode-row"></div>
+      </div>
+      <p class="small-copy small-copy--tight" id="focus-summary">${escapeHtml(getFretFocusSummary())}</p>
+      <div class="display-grid display-grid--compact">
+        <div class="field-row">
+          <label for="fret-focus-position">${escapeHtml(t("fretFocusPositionLabel"))}</label>
+          <select id="fret-focus-position" name="fret-focus-position"></select>
+        </div>
+        <div class="field-row">
+          <label for="fret-range-start">${escapeHtml(t("fretRangeStartLabel"))}</label>
+          <select id="fret-range-start" name="fret-range-start"></select>
+        </div>
+        <div class="field-row">
+          <label for="fret-range-end">${escapeHtml(t("fretRangeEndLabel"))}</label>
+          <select id="fret-range-end" name="fret-range-end"></select>
+        </div>
+      </div>
+      <div class="field-row field-row--full field-row--actions">
+        <div class="toggle-row" id="focus-actions-row"></div>
+      </div>
+    </div>
+  `;
+
   const displayCard = document.createElement("section");
   displayCard.className = "control-card control-card--half control-card--display";
   displayCard.innerHTML = `
-    <h2>${escapeHtml(t("sectionDisplay"))}</h2>
+    ${buildCardHeader(t("sectionDisplay"), t("sectionDisplayHelp"))}
     <div class="card-stack">
       <div class="display-grid display-grid--compact">
         <div class="field-row">
@@ -1024,6 +1315,10 @@ function renderControls() {
         <div class="field-row">
           <span>${escapeHtml(t("noteDisplayLabel"))}</span>
           <div class="toggle-row" id="note-display-row"></div>
+        </div>
+        <div class="field-row">
+          <span>${escapeHtml(t("noteColorLabel"))}</span>
+          <div class="toggle-row" id="note-color-row"></div>
         </div>
         <div class="field-row">
           <span>${escapeHtml(t("handednessLabel"))}</span>
@@ -1058,13 +1353,14 @@ function renderControls() {
   const tuningCard = document.createElement("section");
   tuningCard.className = "control-card control-card--wide control-card--tuning";
   tuningCard.innerHTML = `
-    <h2>${escapeHtml(t("sectionTunings"))}</h2>
+    ${buildCardHeader(t("sectionTunings"), t("sectionTuningsHelp"))}
+    ${buildSectionLabel(t("presetsLabel"))}
     <div class="presets-row" id="preset-tunings"></div>
-    <p class="small-copy">${escapeHtml(t("tuningsHelp"))}</p>
     <div class="saved-tunings-section">
       <div class="saved-tunings-header">${escapeHtml(t("savedTuningsLabel"))}</div>
       <div class="saved-tunings-list" id="saved-tunings-list">${buildSavedTuningsMarkup()}</div>
     </div>
+    ${buildSectionLabel(t("customTuningSection"))}
     <div class="custom-grid">
       <div class="field-row">
         <label for="custom-label">${escapeHtml(t("customLabel"))}</label>
@@ -1089,7 +1385,7 @@ function renderControls() {
 
   const rightColumn = document.createElement("div");
   rightColumn.className = "controls-column controls-column--right";
-  rightColumn.append(scaleCard, modeCard, displayCard);
+  rightColumn.append(scaleCard, chordCard, modeCard, focusCard, displayCard);
 
   controlsNode.append(mobileTitle, leftColumn, rightColumn, mobileLanguage);
 
@@ -1231,11 +1527,30 @@ function renderControls() {
     );
   });
 
+  const noteColorRow = displayCard.querySelector("#note-color-row");
+  [
+    { id: "chromatic", label: t("colorChromatic") },
+    { id: "degree", label: t("colorDegree") },
+  ].forEach((mode) => {
+    noteColorRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.noteColorMode === mode.id,
+        onClick: () => {
+          state.noteColorMode = mode.id;
+          render();
+        },
+      })
+    );
+  });
+
   const highlightModeRow = modeCard.querySelector("#highlight-mode-row");
   [
     { id: "all", label: t("highlightAll") },
     { id: "custom", label: t("highlightCustom") },
     { id: "scale", label: t("highlightScale") },
+    { id: "chord", label: t("highlightChord") },
   ].forEach((mode) => {
     highlightModeRow.append(
       createButton({
@@ -1349,8 +1664,87 @@ function renderControls() {
   fretSelect.value = String(renderedFretCount);
   fretSelect.addEventListener("change", (event) => {
     state.fretCount = Number(event.target.value);
+    clampFretRange();
     render();
   });
+
+  const focusModeRow = focusCard.querySelector("#focus-mode-row");
+  [
+    { id: "off", label: t("fretFocusOff") },
+    { id: "position", label: t("fretFocusPosition") },
+    { id: "custom", label: t("fretFocusCustom") },
+  ].forEach((mode) => {
+    focusModeRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.fretFocusMode === mode.id,
+        onClick: () => {
+          state.fretFocusMode = mode.id;
+          clampFretRange();
+          render();
+        },
+      })
+    );
+  });
+
+  const focusPositionSelect = focusCard.querySelector("#fret-focus-position");
+  const fretRangeStartSelect = focusCard.querySelector("#fret-range-start");
+  const fretRangeEndSelect = focusCard.querySelector("#fret-range-end");
+  Array.from({ length: renderedFretCount }, (_, index) => index + 1).forEach((fret) => {
+    const positionOption = document.createElement("option");
+    positionOption.value = String(fret);
+    positionOption.textContent = `${fret}`;
+    positionOption.selected = fret === state.fretFocusPosition;
+    focusPositionSelect.append(positionOption);
+
+    const startOption = document.createElement("option");
+    startOption.value = String(fret);
+    startOption.textContent = String(fret);
+    startOption.selected = fret === state.fretRangeStart;
+    fretRangeStartSelect.append(startOption);
+
+    const endOption = document.createElement("option");
+    endOption.value = String(fret);
+    endOption.textContent = String(fret);
+    endOption.selected = fret === state.fretRangeEnd;
+    fretRangeEndSelect.append(endOption);
+  });
+  focusPositionSelect.value = String(state.fretFocusPosition);
+  fretRangeStartSelect.value = String(state.fretRangeStart);
+  fretRangeEndSelect.value = String(state.fretRangeEnd);
+  focusPositionSelect.disabled = state.fretFocusMode !== "position";
+  fretRangeStartSelect.disabled = state.fretFocusMode !== "custom";
+  fretRangeEndSelect.disabled = state.fretFocusMode !== "custom";
+  focusPositionSelect.addEventListener("change", (event) => {
+    state.fretFocusMode = "position";
+    state.fretFocusPosition = Number(event.target.value);
+    clampFretRange();
+    render();
+  });
+  fretRangeStartSelect.addEventListener("change", (event) => {
+    state.fretFocusMode = "custom";
+    state.fretRangeStart = Number(event.target.value);
+    clampFretRange();
+    render();
+  });
+  fretRangeEndSelect.addEventListener("change", (event) => {
+    state.fretFocusMode = "custom";
+    state.fretRangeEnd = Number(event.target.value);
+    clampFretRange();
+    render();
+  });
+  focusCard.querySelector("#focus-actions-row").append(
+    createButton({
+      label: t("fretFocusReset"),
+      className: "toggle-button",
+      isDimmed: state.fretFocusMode === "off",
+      onClick: () => {
+        resetFretFocus();
+        render();
+      },
+    })
+  );
 
   const scaleLengthSelect = displayCard.querySelector("#scale-length");
   scaleLengthSelect.value = String(state.scaleLength);
@@ -1445,6 +1839,46 @@ function renderControls() {
       notes: getScaleNotes(state.selectedScaleRoot, state.selectedScaleType, state.noteNaming).join(" "),
     })
   );
+
+  const chordRoot = chordCard.querySelector("#chord-root");
+  getChromaticScale(state.noteNaming).forEach((note) => {
+    const option = document.createElement("option");
+    option.value = note;
+    option.textContent = note;
+    option.selected = state.selectedChordRoot === note;
+    chordRoot.append(option);
+  });
+  chordRoot.addEventListener("change", (event) => {
+    state.selectedChordRoot = event.target.value;
+    if (state.highlightMode === "chord") {
+      syncVisibleNotesForMode();
+    }
+    render();
+  });
+
+  const chordType = chordCard.querySelector("#chord-type");
+  Object.keys(CHORD_PATTERNS).forEach((id) => {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = getChordLabel(id);
+    option.selected = state.selectedChordType === id;
+    chordType.append(option);
+  });
+  chordType.addEventListener("change", (event) => {
+    state.selectedChordType = event.target.value;
+    if (state.highlightMode === "chord") {
+      syncVisibleNotesForMode();
+    }
+    render();
+  });
+
+  chordCard.querySelector("#chord-summary").innerHTML = escapeHtml(
+    t("chordSummary", {
+      root: state.selectedChordRoot,
+      label: getChordLabel(state.selectedChordType),
+      notes: getChordNotes(state.selectedChordRoot, state.selectedChordType, state.noteNaming).join(" "),
+    })
+  );
 }
 
 function applyResponsiveNoteSizing(fretsNode, renderedFretCount) {
@@ -1480,6 +1914,7 @@ function applyResponsiveNoteSizing(fretsNode, renderedFretCount) {
 
 function renderGuitar() {
   const renderedFretCount = getRenderableFretCount();
+  clampFretRange();
   const noteGrid = getFretboardNotes(state.tuningOctaves, renderedFretCount, state.noteNaming);
   const reversedOpenNotes = [...state.tuningOctaves]
     .reverse()
@@ -1519,11 +1954,15 @@ function renderGuitar() {
     if (state.capo === 0) {
       const isVisible = isNoteVisible(noteName);
       const isRoot = shouldHighlightRoot(noteName);
+      const hue = getNoteHue(noteName);
 
       const badge = document.createElement("div");
       badge.className = `open-note${isVisible ? " is-open-active" : ""}${isRoot ? " is-open-root-note" : ""}`;
       badge.dataset.note = noteName;
       badge.innerHTML = getDisplayHtml(noteName);
+      if (typeof hue === "number") {
+        badge.style.setProperty("--hue", String(hue));
+      }
 
       string.appendChild(badge);
     }
@@ -1536,6 +1975,9 @@ function renderGuitar() {
     fret.dataset.fret = String(fretIndex);
     if (state.capo > 0 && fretIndex <= state.capo) {
       fret.classList.add("is-capo-muted");
+    }
+    if (!isFretInRange(fretIndex)) {
+      fret.classList.add("is-out-of-range");
     }
 
     if (state.fretLayout === "real") {
@@ -1573,6 +2015,9 @@ function renderGuitar() {
       noteNode.dataset.note = note.noteName;
       noteNode.dataset.noteWithOctave = note.noteWithOctave;
       noteNode.innerHTML = note.displayHtml;
+      if (typeof note.hue === "number") {
+        noteNode.style.setProperty("--hue", String(note.hue));
+      }
       fret.appendChild(noteNode);
     }
 
@@ -1613,8 +2058,13 @@ function buildUrlState() {
   params.set("lang", state.language);
   params.set("capo", String(state.capo));
   params.set("display", state.noteDisplayMode);
+  params.set("color", state.noteColorMode);
   params.set("root", state.selectedScaleRoot);
   params.set("scale", state.selectedScaleType);
+  params.set("chordRoot", state.selectedChordRoot);
+  params.set("chordType", state.selectedChordType);
+  params.set("focus", state.fretFocusMode);
+  params.set("position", String(state.fretFocusPosition));
   params.set("highlight", state.highlightMode);
   params.set("naming", state.noteNaming);
   params.set("hand", state.handedness);
@@ -1622,6 +2072,8 @@ function buildUrlState() {
   params.set("layout", state.fretLayout);
   params.set("scaleLen", String(state.scaleLength));
   params.set("frets", String(state.fretCount));
+  params.set("rangeStart", String(state.fretRangeStart));
+  params.set("rangeEnd", String(state.fretRangeEnd));
   if (state.highlightMode === "custom") {
     params.set("visible", state.visibleNotes.join(","));
   }
@@ -1652,8 +2104,13 @@ function loadStateFromUrl() {
   if (params.has("lang")) snapshot.language = params.get("lang");
   if (params.has("capo")) snapshot.capo = Number(params.get("capo"));
   if (params.has("display")) snapshot.noteDisplayMode = params.get("display");
+  if (params.has("color")) snapshot.noteColorMode = params.get("color");
   if (params.has("root")) snapshot.selectedScaleRoot = params.get("root");
   if (params.has("scale")) snapshot.selectedScaleType = params.get("scale");
+  if (params.has("chordRoot")) snapshot.selectedChordRoot = params.get("chordRoot");
+  if (params.has("chordType")) snapshot.selectedChordType = params.get("chordType");
+  if (params.has("focus")) snapshot.fretFocusMode = params.get("focus");
+  if (params.has("position")) snapshot.fretFocusPosition = Number(params.get("position"));
   if (params.has("highlight")) snapshot.highlightMode = params.get("highlight");
   if (params.has("naming")) snapshot.noteNaming = params.get("naming");
   if (params.has("hand")) snapshot.handedness = params.get("hand");
@@ -1661,6 +2118,8 @@ function loadStateFromUrl() {
   if (params.has("layout")) snapshot.fretLayout = params.get("layout");
   if (params.has("scaleLen")) snapshot.scaleLength = Number(params.get("scaleLen"));
   if (params.has("frets")) snapshot.fretCount = Number(params.get("frets"));
+  if (params.has("rangeStart")) snapshot.fretRangeStart = Number(params.get("rangeStart"));
+  if (params.has("rangeEnd")) snapshot.fretRangeEnd = Number(params.get("rangeEnd"));
   if (params.has("visible")) {
     snapshot.visibleNotes = params.get("visible").split(",").map((value) => value.trim()).filter(Boolean);
   } else if (params.get("highlight") === "custom") {
