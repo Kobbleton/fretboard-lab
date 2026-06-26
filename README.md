@@ -45,11 +45,39 @@ http://127.0.0.1:4173/index.html
 
 ## Project Files
 
-- `index.html` — page shell
-- `styles.css` — UI, fretboard, responsive layout
-- `app-i18n.js` — fretboard logic, controls, translations, rendering
-- `favicon.svg` — app favicon
-- `launch-open-tunings.ps1` — local server launcher
+- `index.html` - page shell
+- `styles.css` - UI, fretboard, responsive layout
+- `app-i18n.js` - fretboard logic, controls, translations, rendering
+- `favicon.svg` - app favicon
+- `launch-open-tunings.ps1` - local server launcher
+
+## Roadmap
+
+### v1.1 - Usability & Core Workflow
+
+- [ ] Save custom tunings locally
+- [ ] Add capo control
+- [ ] Add interval mode
+- [ ] Highlight root notes separately
+- [ ] Preserve app state in URL
+- [ ] Export current fretboard as PNG
+
+### v1.2 - Music Workflow Features
+
+- [ ] Add chord mode
+- [ ] Add user presets
+- [ ] Add fret-range focus mode
+- [ ] Add side-by-side tuning comparison
+- [ ] Color notes by scale degree
+- [ ] Expand built-in tuning preset library
+
+### v2.0 - Practice & Expansion
+
+- [ ] Add note playback on click
+- [ ] Add guided practice mode
+- [ ] Support more instruments
+- [ ] Support custom scales and interval formulas
+- [ ] Add PWA offline support
 
 ## Notes
 
