@@ -2,11 +2,15 @@
 
 Interactive guitar fretboard for open tunings, scales, and custom note highlighting.
 
+![fretboard-lab preview](./docs/readme-preview.png)
+
 ## Overview
 
 `fretboard-lab` is a lightweight static web app for exploring guitar tunings and note layouts on the fretboard.
 
-It was built for practical everyday use:
+It was built as a practical everyday tool for exploring alternate tunings, scales, and note patterns on the guitar neck.
+
+## Features
 
 - alternate and open tunings
 - custom tuning input
@@ -17,6 +21,15 @@ It was built for practical everyday use:
 - dot and block inlays
 - mobile layout optimized for quick reference
 - multilingual UI
+
+## Why This Project
+
+The app is intentionally simple:
+
+- static HTML, CSS, and JavaScript
+- no canvas rendering
+- no framework overhead
+- easy to customize for personal tunings and workflows
 
 ## Stack
 
