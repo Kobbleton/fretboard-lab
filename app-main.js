@@ -1,0 +1,1768 @@
+const NOTE_NAMES_FLAT = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+const NOTE_NAMES_SHARP = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const INTERVAL_LABELS = ["1", "b2", "2", "b3", "3", "4", "b5", "5", "b6", "6", "b7", "7"];
+const STORAGE_KEY = "open-tunings-fretboard-state-v3";
+const PREVIOUS_STORAGE_KEY = "open-tunings-fretboard-state-v2";
+const LEGACY_STORAGE_KEY = "open-tunings-fretboard-state-v1";
+const MOBILE_MEDIA_QUERY = "(max-width: 720px)";
+const MOBILE_MAX_FRET_COUNT = 13;
+const MOBILE_FRET_COUNTS = [12, 13];
+const DESKTOP_FRET_COUNTS = [12, 13, 15, 21, 22, 24];
+const SCALE_LENGTHS = [24.75, 25.5, 27];
+const CAPO_OPTIONS = Array.from({ length: 13 }, (_, index) => index);
+
+const NOTE_TO_SEMITONE = {
+  C: 0,
+  "B#": 0,
+  "C#": 1,
+  Db: 1,
+  D: 2,
+  "D#": 3,
+  Eb: 3,
+  E: 4,
+  Fb: 4,
+  F: 5,
+  "E#": 5,
+  "F#": 6,
+  Gb: 6,
+  G: 7,
+  "G#": 8,
+  Ab: 8,
+  A: 9,
+  "A#": 10,
+  Bb: 10,
+  B: 11,
+  Cb: 11,
+};
+
+const PRESET_TUNINGS = [
+  { id: "standard", label: "Standard", notes: ["E", "A", "D", "G", "B", "E"], octaves: ["E2", "A2", "D3", "G3", "B3", "E4"] },
+  { id: "drop-d", label: "Drop D", notes: ["D", "A", "D", "G", "B", "E"], octaves: ["D2", "A2", "D3", "G3", "B3", "E4"] },
+  { id: "open-g", label: "Open G", notes: ["D", "G", "D", "G", "B", "D"], octaves: ["D2", "G2", "D3", "G3", "B3", "D4"] },
+  { id: "dadgad", label: "DADGAD", notes: ["D", "A", "D", "G", "A", "D"], octaves: ["D2", "A2", "D3", "G3", "A3", "D4"] },
+  { id: "drop-c", label: "Drop C", notes: ["C", "G", "C", "F", "A", "D"], octaves: ["C2", "G2", "C3", "F3", "A3", "D4"] },
+  { id: "open-c", label: "Open C", notes: ["C", "G", "C", "G", "C", "E"], octaves: ["C2", "G2", "C3", "G3", "C4", "E4"] },
+  { id: "facgce", label: "FACGCE", notes: ["F", "A", "C", "G", "C", "E"], octaves: ["F2", "A2", "C3", "G3", "C4", "E4"] },
+  { id: "double-drop-d", label: "Double Drop D", notes: ["D", "A", "D", "G", "B", "D"], octaves: ["D2", "A2", "D3", "G3", "B3", "D4"] },
+];
+
+const SCALE_PATTERNS = {
+  major: { intervals: [0, 2, 4, 5, 7, 9, 11], labels: { en: "Major (Ionian)" } },
+  minor: { intervals: [0, 2, 3, 5, 7, 8, 10], labels: { en: "Minor (Aeolian)" } },
+  harmonicMinor: { intervals: [0, 2, 3, 5, 7, 8, 11], labels: { en: "Harmonic Minor" } },
+  melodicMinor: { intervals: [0, 2, 3, 5, 7, 9, 11], labels: { en: "Melodic Minor" } },
+  dorian: { intervals: [0, 2, 3, 5, 7, 9, 10], labels: { en: "Dorian" } },
+  phrygian: { intervals: [0, 1, 3, 5, 7, 8, 10], labels: { en: "Phrygian" } },
+  lydian: { intervals: [0, 2, 4, 6, 7, 9, 11], labels: { en: "Lydian" } },
+  mixolydian: { intervals: [0, 2, 4, 5, 7, 9, 10], labels: { en: "Mixolydian" } },
+  locrian: { intervals: [0, 1, 3, 5, 6, 8, 10], labels: { en: "Locrian" } },
+  majorPentatonic: { intervals: [0, 2, 4, 7, 9], labels: { en: "Major Pentatonic" } },
+  minorPentatonic: { intervals: [0, 3, 5, 7, 10], labels: { en: "Minor Pentatonic" } },
+};
+
+const LANGUAGES = [
+  { id: "en", label: "English" },
+  { id: "uk", label: "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430" },
+  { id: "es", label: "Espa\u00f1ol" },
+  { id: "ru", label: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", square: true },
+];
+
+const I18N = {
+  en: {
+    documentTitle: "Open Tunings Fretboard",
+    heroTitle: "Fretboard for your tunings",
+    fretboardAria: "Interactive guitar fretboard",
+    sectionTunings: "Tunings",
+    tuningsHelp: "Pick a preset tuning, save your own versions, or enter a six-string setup manually.",
+    customLabel: "Tuning name",
+    customLabelPlaceholder: "For example: FACGCE",
+    customNotes: "Notes with octaves",
+    customNotesPlaceholder: "F2 A2 C3 G3 C4 E4",
+    applyCustom: "Apply tuning",
+    saveCustom: "Save tuning",
+    savedTuningsLabel: "Saved tunings",
+    noSavedTunings: "No saved tunings yet.",
+    deleteSaved: "Delete",
+    hideAll: "Hide all",
+    showAll: "Show all",
+    sectionDisplay: "Display",
+    sectionMode: "Highlight mode",
+    sectionNotes: "Note highlight",
+    sectionScale: "Scale",
+    noteNamingLabel: "Note labels",
+    noteDisplayLabel: "Display mode",
+    displayNotes: "Notes",
+    displayIntervals: "Intervals",
+    highlightModeLabel: "Highlight mode",
+    handednessLabel: "Orientation",
+    inlayStyleLabel: "Inlays",
+    fretLayoutLabel: "Fret spacing",
+    scaleLengthLabel: "Scale length",
+    fretCountLabel: "Frets",
+    capoLabel: "Capo",
+    exportPng: "Export PNG",
+    capoBadge: ({ capo }) => `Capo ${capo}`,
+    namingFlats: "\u266d Flats",
+    namingSharps: "\u266f Sharps",
+    highlightAll: "All",
+    highlightCustom: "Selected",
+    highlightScale: "Scale",
+    handednessRight: "Right-handed",
+    handednessLeft: "Left-handed",
+    inlayDots: "Dots",
+    inlayBlocks: "Blocks",
+    fretLayoutChart: "Chart",
+    fretLayoutReal: "Real scale",
+    scaleLengthStandard: '25.5" Standard',
+    scaleLengthGibson: '24.75" Short',
+    scaleLengthBaritone: '27" Baritone',
+    scaleRootLabel: "Root",
+    scaleTypeLabel: "Scale type",
+    customTuningDefault: "Custom tuning",
+    msgPresetApplied: ({ preset }) => `Tuning "${preset}" is active.`,
+    msgCustomApplied: ({ label }) => `Tuning "${label}" is applied.`,
+    msgTuningSaved: ({ label }) => `Saved tuning "${label}" is ready to reuse.`,
+    msgSavedDeleted: ({ label }) => `Saved tuning "${label}" was removed.`,
+    msgAllHidden: "All notes are hidden. Turn on only the ones you want.",
+    msgAllShown: "All notes are visible again.",
+    msgSharps: "Note labels switched to sharps.",
+    msgFlats: "Note labels switched to flats.",
+    msgPngExported: "PNG export started.",
+    msgPngFailed: "PNG export could not be created in this browser.",
+    errorNeedSixNotes: "Enter exactly 6 notes with octaves, separated by spaces.",
+    errorInvalidNoteWithOctave: ({ value }) => `Invalid note with octave: ${value}`,
+    errorUnsupportedNote: ({ value }) => `Unsupported note name: ${value}`,
+    scaleSummary: ({ root, label, notes }) => `${root} ${label}: ${notes}`,
+  },
+};
+
+I18N.uk = {
+  ...I18N.en,
+  documentTitle: "\u0413\u0440\u0438\u0444 \u0434\u043b\u044f \u0432\u0456\u0434\u043a\u0440\u0438\u0442\u0438\u0445 \u0441\u0442\u0440\u043e\u0457\u0432",
+  heroTitle: "\u0413\u0440\u0438\u0444 \u0434\u043b\u044f \u0442\u0432\u043e\u0457\u0445 \u0441\u0442\u0440\u043e\u0457\u0432",
+  sectionTunings: "\u0421\u0442\u0440\u043e\u0457",
+  tuningsHelp: "\u041e\u0431\u0435\u0440\u0438 \u0433\u043e\u0442\u043e\u0432\u0438\u0439 \u0441\u0442\u0440\u0456\u0439, \u0437\u0431\u0435\u0440\u0456\u0433\u0430\u0439 \u0441\u0432\u043e\u0457 \u0432\u0430\u0440\u0456\u0430\u043d\u0442\u0438 \u0430\u0431\u043e \u0432\u0432\u0435\u0434\u0438 \u0432\u043b\u0430\u0441\u043d\u0438\u0439 \u0448\u0435\u0441\u0442\u0438\u0441\u0442\u0440\u0443\u043d\u043d\u0438\u0439 \u0441\u0442\u0440\u0456\u0439.",
+  customLabel: "\u041d\u0430\u0437\u0432\u0430 \u0441\u0442\u0440\u043e\u044e",
+  customNotes: "\u041d\u043e\u0442\u0438 \u0437 \u043e\u043a\u0442\u0430\u0432\u0430\u043c\u0438",
+  applyCustom: "\u0417\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438",
+  saveCustom: "\u0417\u0431\u0435\u0440\u0435\u0433\u0442\u0438",
+  savedTuningsLabel: "\u0417\u0431\u0435\u0440\u0435\u0436\u0435\u043d\u0456 \u0441\u0442\u0440\u043e\u0457",
+  noSavedTunings: "\u041f\u043e\u043a\u0438 \u043d\u0435\u043c\u0430\u0454 \u0437\u0431\u0435\u0440\u0435\u0436\u0435\u043d\u0438\u0445 \u0441\u0442\u0440\u043e\u0457\u0432.",
+  deleteSaved: "\u0412\u0438\u0434\u0430\u043b\u0438\u0442\u0438",
+  hideAll: "\u0421\u0445\u043e\u0432\u0430\u0442\u0438 \u0432\u0441\u0435",
+  showAll: "\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0432\u0441\u0435",
+  sectionDisplay: "\u0412\u0456\u0434\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u043d\u044f",
+  sectionMode: "\u0420\u0435\u0436\u0438\u043c \u043f\u0456\u0434\u0441\u0432\u0456\u0442\u043a\u0438",
+  sectionNotes: "\u041f\u0456\u0434\u0441\u0432\u0456\u0442\u043a\u0430 \u043d\u043e\u0442",
+  sectionScale: "\u0413\u0430\u043c\u0430",
+  noteNamingLabel: "\u041f\u0456\u0434\u043f\u0438\u0441\u0438 \u043d\u043e\u0442",
+  noteDisplayLabel: "\u0420\u0435\u0436\u0438\u043c \u043d\u043e\u0442",
+  displayNotes: "\u041d\u043e\u0442\u0438",
+  displayIntervals: "\u0406\u043d\u0442\u0435\u0440\u0432\u0430\u043b\u0438",
+  handednessLabel: "\u041e\u0440\u0456\u0454\u043d\u0442\u0430\u0446\u0456\u044f",
+  inlayStyleLabel: "\u0406\u043d\u043b\u0435\u0457",
+  fretLayoutLabel: "\u0412\u0456\u0434\u0441\u0442\u0430\u043d\u044c \u043b\u0430\u0434\u0456\u0432",
+  scaleLengthLabel: "\u041c\u0435\u043d\u0437\u0443\u0440\u0430",
+  fretCountLabel: "\u041b\u0430\u0434\u0438",
+  capoLabel: "Capo",
+  exportPng: "Export PNG",
+  namingFlats: "\u266d \u0411\u0435\u043c\u043e\u043b\u0456",
+  namingSharps: "\u266f \u0414\u0456\u0454\u0437\u0438",
+  highlightAll: "\u0423\u0441\u0456",
+  highlightCustom: "\u0412\u0438\u0431\u0440\u0430\u043d\u0456",
+  highlightScale: "\u0413\u0430\u043c\u0430",
+  handednessRight: "\u041f\u0440\u0430\u0432\u0448\u0430",
+  handednessLeft: "\u041b\u0456\u0432\u0448\u0430",
+  inlayDots: "\u0422\u043e\u0447\u043a\u0438",
+  inlayBlocks: "\u0411\u043b\u043e\u043a\u0438",
+  fretLayoutChart: "\u0421\u0456\u0442\u043a\u0430",
+  fretLayoutReal: "\u0420\u0435\u0430\u043b\u044c\u043d\u0430 \u043c\u0435\u043d\u0437\u0443\u0440\u0430",
+  scaleLengthStandard: '25.5" \u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442',
+  scaleLengthGibson: '24.75" \u041a\u043e\u0440\u043e\u0442\u043a\u0430',
+  scaleLengthBaritone: '27" \u0411\u0430\u0440\u0438\u0442\u043e\u043d',
+  scaleRootLabel: "\u0422\u043e\u043d\u0456\u043a\u0430",
+  scaleTypeLabel: "\u0422\u0438\u043f \u0433\u0430\u043c\u0438",
+  customTuningDefault: "\u0421\u0432\u0456\u0439 \u0441\u0442\u0440\u0456\u0439",
+};
+
+I18N.es = {
+  ...I18N.en,
+  documentTitle: "Diapas\u00f3n para afinaciones abiertas",
+  heroTitle: "Diapas\u00f3n para tus afinaciones",
+  sectionTunings: "Afinaciones",
+  tuningsHelp: "Elige una afinaci\u00f3n predefinida, guarda tus propias variantes o escribe una afinaci\u00f3n manual de seis cuerdas.",
+  customLabel: "Nombre de afinaci\u00f3n",
+  customNotes: "Notas con octavas",
+  applyCustom: "Aplicar",
+  saveCustom: "Guardar",
+  savedTuningsLabel: "Afinaciones guardadas",
+  noSavedTunings: "Todav\u00eda no hay afinaciones guardadas.",
+  deleteSaved: "Eliminar",
+  hideAll: "Ocultar todo",
+  showAll: "Mostrar todo",
+  sectionDisplay: "Visualizaci\u00f3n",
+  sectionMode: "Modo de resaltado",
+  sectionNotes: "Resaltado de notas",
+  sectionScale: "Escala",
+  noteNamingLabel: "Etiquetas de notas",
+  noteDisplayLabel: "Modo de vista",
+  displayNotes: "Notas",
+  displayIntervals: "Intervalos",
+  handednessLabel: "Orientaci\u00f3n",
+  inlayStyleLabel: "Inlays",
+  fretLayoutLabel: "Espaciado",
+  scaleLengthLabel: "Escala",
+  fretCountLabel: "Trastes",
+  capoLabel: "Capo",
+  exportPng: "Exportar PNG",
+  namingFlats: "\u266d Bemoles",
+  namingSharps: "\u266f Sostenidos",
+  highlightAll: "Todas",
+  highlightCustom: "Elegidas",
+  highlightScale: "Escala",
+  handednessRight: "Diestro",
+  handednessLeft: "Zurdo",
+  inlayDots: "Puntos",
+  inlayBlocks: "Bloques",
+  fretLayoutChart: "Cuadr\u00edcula",
+  fretLayoutReal: "Escala real",
+  scaleLengthStandard: '25.5" Est\u00e1ndar',
+  scaleLengthGibson: '24.75" Corta',
+  scaleLengthBaritone: '27" Bar\u00edtono',
+  scaleRootLabel: "T\u00f3nica",
+  scaleTypeLabel: "Tipo de escala",
+  customTuningDefault: "Afinaci\u00f3n personalizada",
+};
+
+I18N.ru = {
+  ...I18N.en,
+  documentTitle: "\u0413\u0440\u0438\u0444 \u0434\u043b\u044f \u043e\u0442\u043a\u0440\u044b\u0442\u044b\u0445 \u0441\u0442\u0440\u043e\u0435\u0432",
+  heroTitle: "\u0413\u0440\u0438\u0444 \u0434\u043b\u044f \u0441\u0432\u043e\u0438\u0445 \u0441\u0442\u0440\u043e\u0451\u0432",
+  sectionTunings: "\u0421\u0442\u0440\u043e\u0438",
+  tuningsHelp: "\u0412\u044b\u0431\u0435\u0440\u0438 \u0433\u043e\u0442\u043e\u0432\u044b\u0439 \u0441\u0442\u0440\u043e\u0439, \u0441\u043e\u0445\u0440\u0430\u043d\u044f\u0439 \u0441\u0432\u043e\u0438 \u0432\u0430\u0440\u0438\u0430\u043d\u0442\u044b \u0438\u043b\u0438 \u0432\u0432\u0435\u0434\u0438 \u0441\u0432\u043e\u0439 \u0448\u0435\u0441\u0442\u0438\u0441\u0442\u0440\u0443\u043d\u043d\u044b\u0439 \u0441\u0442\u0440\u043e\u0439 \u0432\u0440\u0443\u0447\u043d\u0443\u044e.",
+  customLabel: "\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u0441\u0442\u0440\u043e\u044f",
+  customNotes: "\u041d\u043e\u0442\u044b \u0441 \u043e\u043a\u0442\u0430\u0432\u0430\u043c\u0438",
+  applyCustom: "\u041f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c",
+  saveCustom: "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c",
+  savedTuningsLabel: "\u0421\u043e\u0445\u0440\u0430\u043d\u0451\u043d\u043d\u044b\u0435 \u0441\u0442\u0440\u043e\u0438",
+  noSavedTunings: "\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0441\u043e\u0445\u0440\u0430\u043d\u0451\u043d\u043d\u044b\u0445 \u0441\u0442\u0440\u043e\u0435\u0432.",
+  deleteSaved: "\u0423\u0434\u0430\u043b\u0438\u0442\u044c",
+  hideAll: "\u0421\u043a\u0440\u044b\u0442\u044c \u0432\u0441\u0451",
+  showAll: "\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u0432\u0441\u0451",
+  sectionDisplay: "\u041e\u0442\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u0435",
+  sectionMode: "\u0420\u0435\u0436\u0438\u043c \u043f\u043e\u0434\u0441\u0432\u0435\u0442\u043a\u0438",
+  sectionNotes: "\u041f\u043e\u0434\u0441\u0432\u0435\u0442\u043a\u0430 \u043d\u043e\u0442",
+  sectionScale: "\u0413\u0430\u043c\u043c\u0430",
+  noteNamingLabel: "\u041f\u043e\u0434\u043f\u0438\u0441\u0438 \u043d\u043e\u0442",
+  noteDisplayLabel: "\u0420\u0435\u0436\u0438\u043c \u043f\u043e\u043a\u0430\u0437\u0430",
+  displayNotes: "\u041d\u043e\u0442\u044b",
+  displayIntervals: "\u0418\u043d\u0442\u0435\u0440\u0432\u0430\u043b\u044b",
+  handednessLabel: "\u041e\u0440\u0438\u0435\u043d\u0442\u0430\u0446\u0438\u044f",
+  inlayStyleLabel: "\u0418\u043d\u043b\u0435\u0438",
+  fretLayoutLabel: "\u0420\u0430\u0441\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u043b\u0430\u0434\u043e\u0432",
+  scaleLengthLabel: "\u041c\u0435\u043d\u0437\u0443\u0440\u0430",
+  fretCountLabel: "\u041b\u0430\u0434\u044b",
+  capoLabel: "Capo",
+  exportPng: "\u042d\u043a\u0441\u043f\u043e\u0440\u0442 PNG",
+  namingFlats: "\u266d \u0411\u0435\u043c\u043e\u043b\u0438",
+  namingSharps: "\u266f \u0414\u0438\u0435\u0437\u044b",
+  highlightAll: "\u0412\u0441\u0435",
+  highlightCustom: "\u0412\u044b\u0431\u0440\u0430\u043d\u043d\u044b\u0435",
+  highlightScale: "\u0413\u0430\u043c\u043c\u0430",
+  handednessRight: "\u041f\u0440\u0430\u0432\u0448\u0430",
+  handednessLeft: "\u041b\u0435\u0432\u0448\u0430",
+  inlayDots: "\u0422\u043e\u0447\u043a\u0438",
+  inlayBlocks: "\u0411\u043b\u043e\u043a\u0438",
+  fretLayoutChart: "\u0421\u0435\u0442\u043a\u0430",
+  fretLayoutReal: "\u0420\u0435\u0430\u043b\u044c\u043d\u0430\u044f \u043c\u0435\u043d\u0437\u0443\u0440\u0430",
+  scaleLengthStandard: '25.5" \u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442',
+  scaleLengthGibson: '24.75" \u041a\u043e\u0440\u043e\u0442\u043a\u0430\u044f',
+  scaleLengthBaritone: '27" \u0411\u0430\u0440\u0438\u0442\u043e\u043d',
+  scaleRootLabel: "\u0422\u043e\u043d\u0438\u043a\u0430",
+  scaleTypeLabel: "\u0422\u0438\u043f \u0433\u0430\u043c\u043c\u044b",
+  customTuningDefault: "\u0421\u0432\u043e\u0439 \u0441\u0442\u0440\u043e\u0439",
+};
+
+const SINGLE_MARKER_FRETS = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
+const DOUBLE_MARKER_FRETS = new Set([12, 24]);
+const BLOCK_MARKER_FRETS = new Set([3, 5, 7, 9, 12, 15, 17, 19, 21, 24]);
+const defaultTuning = PRESET_TUNINGS[0];
+
+const state = {
+  language: "en",
+  languageMenuOpen: false,
+  tuningName: defaultTuning.label,
+  tuningId: defaultTuning.id,
+  tuningNotes: [...defaultTuning.notes],
+  tuningOctaves: [...defaultTuning.octaves],
+  visibleNotes: [...NOTE_NAMES_SHARP],
+  noteNaming: "sharps",
+  noteDisplayMode: "notes",
+  handedness: "right",
+  inlayStyle: "dots",
+  fretLayout: "chart",
+  scaleLength: 25.5,
+  fretCount: 13,
+  capo: 0,
+  highlightMode: "all",
+  selectedScaleRoot: "C",
+  selectedScaleType: "major",
+  savedTunings: [],
+  tuningDraftLabel: defaultTuning.label,
+  tuningDraftNotesText: defaultTuning.octaves.join(" "),
+  messageKey: "",
+  messageType: "",
+  messageParams: {},
+  inlineMessageText: "",
+  inlineMessageType: "",
+};
+
+const heroNode = document.querySelector(".hero");
+const controlsNode = document.getElementById("controls");
+const guitarNode = document.getElementById("guitar");
+const fretboardPageNode = document.getElementById("fretboard-page") || document.querySelector(".fretboard-page");
+
+function t(key, params = {}) {
+  const table = I18N[state.language] || I18N.en;
+  const value = table[key];
+  if (typeof value === "function") {
+    return value(params);
+  }
+  return value ?? I18N.en[key] ?? key;
+}
+
+function getChromaticScale(mode) {
+  return mode === "sharps" ? NOTE_NAMES_SHARP : NOTE_NAMES_FLAT;
+}
+
+function getScaleLabel(scaleType) {
+  const scale = SCALE_PATTERNS[scaleType];
+  if (!scale) {
+    return scaleType;
+  }
+  return scale.labels[state.language] || scale.labels.en || scaleType;
+}
+
+function parseNoteWithOctave(noteWithOctave) {
+  const match = /^([A-G][b#]?)(\d+)$/.exec(noteWithOctave);
+  if (!match) {
+    throw new Error(t("errorInvalidNoteWithOctave", { value: noteWithOctave }));
+  }
+  return { note: match[1], octave: Number(match[2]) };
+}
+
+function toMidiNumber(noteWithOctave) {
+  const parsed = parseNoteWithOctave(noteWithOctave);
+  return parsed.octave * 12 + NOTE_TO_SEMITONE[parsed.note];
+}
+
+function fromMidiNumber(midiNumber, mode) {
+  const semitone = ((midiNumber % 12) + 12) % 12;
+  const octave = Math.floor(midiNumber / 12);
+  return `${getChromaticScale(mode)[semitone]}${octave}`;
+}
+
+function normalizeNoteName(note, mode) {
+  const semitone = NOTE_TO_SEMITONE[note];
+  if (typeof semitone !== "number") {
+    throw new Error(t("errorUnsupportedNote", { value: note }));
+  }
+  return getChromaticScale(mode)[semitone];
+}
+
+function formatLabelWithAccidentals(label) {
+  return label
+    .replaceAll("#", '<span class="note-accidental note-accidental-sharp">&#9839;</span>')
+    .replaceAll("b", '<span class="note-accidental note-accidental-flat">&#9837;</span>');
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function slugifyLabel(label) {
+  return label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "tuning";
+}
+
+function createSavedTuningId(label) {
+  return `${slugifyLabel(label)}-${Date.now().toString(36)}`;
+}
+
+function getPresetById(tuningId) {
+  return PRESET_TUNINGS.find((item) => item.id === tuningId) || null;
+}
+
+function getSavedTuningById(savedId) {
+  return state.savedTunings.find((item) => item.id === savedId) || null;
+}
+
+function getSavedTuningLabelMatch(label) {
+  const normalized = label.trim().toLowerCase();
+  return state.savedTunings.find((item) => item.label.trim().toLowerCase() === normalized) || null;
+}
+
+function setMessage(key = "", type = "", params = {}) {
+  state.messageKey = key;
+  state.messageType = type;
+  state.messageParams = params;
+  if (key) {
+    scheduleToastDismiss();
+  }
+}
+
+function getMessageText() {
+  if (!state.messageKey) {
+    return "";
+  }
+  return t(state.messageKey, state.messageParams);
+}
+
+let toastDismissTimer = null;
+
+function scheduleToastDismiss() {
+  if (toastDismissTimer) {
+    window.clearTimeout(toastDismissTimer);
+  }
+  toastDismissTimer = window.setTimeout(() => {
+    state.messageKey = "";
+    state.messageType = "";
+    state.messageParams = {};
+    render();
+  }, 2200);
+}
+
+function setInlineMessage(text = "", type = "") {
+  state.inlineMessageText = text;
+  state.inlineMessageType = type;
+}
+
+function syncDraftFromCurrentTuning() {
+  state.tuningDraftLabel = state.tuningName || t("customTuningDefault");
+  state.tuningDraftNotesText = state.tuningOctaves.join(" ");
+}
+
+function normalizeTuningTokens(tokens, mode) {
+  if (tokens.length !== 6) {
+    throw new Error(t("errorNeedSixNotes"));
+  }
+  return tokens.map((token) => {
+    const parsed = parseNoteWithOctave(token);
+    return `${normalizeNoteName(parsed.note, mode)}${parsed.octave}`;
+  });
+}
+
+function buildTuningFromInput(labelValue, notesValue) {
+  const label = labelValue.trim() || t("customTuningDefault");
+  const tokens = notesValue.trim().split(/\s+/).filter(Boolean);
+  const normalized = normalizeTuningTokens(tokens, state.noteNaming);
+  return {
+    id: "custom",
+    label,
+    notes: normalized.map((noteWithOctave) => noteWithOctave.replace(/\d+$/, "")),
+    octaves: normalized,
+  };
+}
+
+function applyTuningObject(tuning, options = {}) {
+  const { tuningId = tuning.id || "custom", withMessage = false, messageKey = "", messageParams = {}, syncDraft = true } = options;
+  state.tuningId = tuningId;
+  state.tuningName = tuning.label;
+  state.tuningNotes = tuning.notes.map((note) => normalizeNoteName(note, state.noteNaming));
+  state.tuningOctaves = tuning.octaves.map((noteWithOctave) => {
+    const noteName = noteWithOctave.replace(/\d+$/, "");
+    const octave = noteWithOctave.replace(/^[A-G][b#]?/, "");
+    return `${normalizeNoteName(noteName, state.noteNaming)}${octave}`;
+  });
+  if (syncDraft) {
+    syncDraftFromCurrentTuning();
+  }
+  if (withMessage && messageKey) {
+    setMessage(messageKey, "is-success", messageParams);
+  }
+}
+
+function applyPresetTuning(tuningId, withMessage = true) {
+  const preset = getPresetById(tuningId);
+  if (!preset) {
+    return;
+  }
+  applyTuningObject(preset, {
+    tuningId: preset.id,
+    withMessage,
+    messageKey: "msgPresetApplied",
+    messageParams: { preset: preset.label },
+  });
+}
+
+function applySavedTuning(savedId, withMessage = false) {
+  const saved = getSavedTuningById(savedId);
+  if (!saved) {
+    return;
+  }
+  applyTuningObject(saved, {
+    tuningId: `saved:${saved.id}`,
+    withMessage,
+    messageKey: "msgPresetApplied",
+    messageParams: { preset: saved.label },
+  });
+}
+
+function saveState() {
+  const snapshot = {
+    language: state.language,
+    tuningId: state.tuningId,
+    tuningName: state.tuningName,
+    tuningNotes: state.tuningNotes,
+    tuningOctaves: state.tuningOctaves,
+    visibleNotes: state.visibleNotes,
+    noteNaming: state.noteNaming,
+    noteDisplayMode: state.noteDisplayMode,
+    handedness: state.handedness,
+    inlayStyle: state.inlayStyle,
+    fretLayout: state.fretLayout,
+    scaleLength: state.scaleLength,
+    fretCount: state.fretCount,
+    capo: state.capo,
+    highlightMode: state.highlightMode,
+    selectedScaleRoot: state.selectedScaleRoot,
+    selectedScaleType: state.selectedScaleType,
+    savedTunings: state.savedTunings,
+    tuningDraftLabel: state.tuningDraftLabel,
+    tuningDraftNotesText: state.tuningDraftNotesText,
+  };
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  } catch (error) {
+    return;
+  }
+}
+
+function getStoredSnapshot() {
+  try {
+    const current = localStorage.getItem(STORAGE_KEY);
+    if (current) {
+      return JSON.parse(current);
+    }
+    const previous = localStorage.getItem(PREVIOUS_STORAGE_KEY);
+    if (previous) {
+      return JSON.parse(previous);
+    }
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    return legacy ? JSON.parse(legacy) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function applySnapshot(parsed) {
+  if (!parsed || typeof parsed !== "object") {
+    return;
+  }
+
+  if (typeof parsed.language === "string" && LANGUAGES.some((language) => language.id === parsed.language)) {
+    state.language = parsed.language;
+  }
+  if (typeof parsed.noteNaming === "string" && ["flats", "sharps"].includes(parsed.noteNaming)) {
+    state.noteNaming = parsed.noteNaming;
+  }
+  if (typeof parsed.noteDisplayMode === "string" && ["notes", "intervals"].includes(parsed.noteDisplayMode)) {
+    state.noteDisplayMode = parsed.noteDisplayMode;
+  }
+  if (typeof parsed.handedness === "string" && ["right", "left"].includes(parsed.handedness)) {
+    state.handedness = parsed.handedness;
+  }
+  if (typeof parsed.inlayStyle === "string" && ["dots", "blocks"].includes(parsed.inlayStyle)) {
+    state.inlayStyle = parsed.inlayStyle;
+  }
+  if (typeof parsed.fretLayout === "string" && ["chart", "real"].includes(parsed.fretLayout)) {
+    state.fretLayout = parsed.fretLayout;
+  }
+  if (typeof parsed.scaleLength === "number" && SCALE_LENGTHS.includes(parsed.scaleLength)) {
+    state.scaleLength = parsed.scaleLength;
+  }
+  if (typeof parsed.fretCount === "number" && DESKTOP_FRET_COUNTS.includes(parsed.fretCount)) {
+    state.fretCount = parsed.fretCount;
+  }
+  if (typeof parsed.capo === "number" && parsed.capo >= 0 && parsed.capo <= 12) {
+    state.capo = parsed.capo;
+  }
+  if (typeof parsed.highlightMode === "string" && ["all", "custom", "scale"].includes(parsed.highlightMode)) {
+    state.highlightMode = parsed.highlightMode;
+  }
+  if (typeof parsed.selectedScaleType === "string" && SCALE_PATTERNS[parsed.selectedScaleType]) {
+    state.selectedScaleType = parsed.selectedScaleType;
+  }
+  if (typeof parsed.selectedScaleRoot === "string") {
+    state.selectedScaleRoot = normalizeNoteName(parsed.selectedScaleRoot, state.noteNaming);
+  }
+  if (Array.isArray(parsed.visibleNotes)) {
+    state.visibleNotes = parsed.visibleNotes.map((note) => normalizeNoteName(note, state.noteNaming));
+  }
+  if (Array.isArray(parsed.savedTunings)) {
+    state.savedTunings = parsed.savedTunings
+      .filter((item) => item && typeof item.label === "string" && Array.isArray(item.octaves) && item.octaves.length === 6)
+      .map((item) => {
+        const octaves = item.octaves.map((noteWithOctave) => {
+          const parsedNote = parseNoteWithOctave(noteWithOctave);
+          return `${normalizeNoteName(parsedNote.note, state.noteNaming)}${parsedNote.octave}`;
+        });
+        return {
+          id: typeof item.id === "string" ? item.id : createSavedTuningId(item.label),
+          label: item.label,
+          notes: octaves.map((noteWithOctave) => noteWithOctave.replace(/\d+$/, "")),
+          octaves,
+        };
+      });
+  }
+  if (typeof parsed.tuningDraftLabel === "string") {
+    state.tuningDraftLabel = parsed.tuningDraftLabel;
+  }
+  if (typeof parsed.tuningDraftNotesText === "string") {
+    state.tuningDraftNotesText = parsed.tuningDraftNotesText;
+  }
+
+  if (typeof parsed.tuningId === "string") {
+    const preset = getPresetById(parsed.tuningId);
+    if (preset) {
+      applyTuningObject(preset, { tuningId: preset.id, syncDraft: false });
+      return;
+    }
+    if (parsed.tuningId.startsWith("saved:")) {
+      const saved = getSavedTuningById(parsed.tuningId.slice(6));
+      if (saved) {
+        applyTuningObject(saved, { tuningId: `saved:${saved.id}`, syncDraft: false });
+        return;
+      }
+    }
+    if (Array.isArray(parsed.tuningOctaves) && parsed.tuningOctaves.length === 6) {
+      const octaves = parsed.tuningOctaves.map((noteWithOctave) => {
+        const parsedNote = parseNoteWithOctave(noteWithOctave);
+        return `${normalizeNoteName(parsedNote.note, state.noteNaming)}${parsedNote.octave}`;
+      });
+      applyTuningObject(
+        {
+          id: parsed.tuningId,
+          label: typeof parsed.tuningName === "string" ? parsed.tuningName : t("customTuningDefault"),
+          notes: octaves.map((noteWithOctave) => noteWithOctave.replace(/\d+$/, "")),
+          octaves,
+        },
+        { tuningId: parsed.tuningId, syncDraft: false }
+      );
+    }
+  }
+}
+
+function loadState() {
+  applySnapshot(getStoredSnapshot());
+}
+
+function getEffectiveTuningOctaves() {
+  if (!state.capo) {
+    return [...state.tuningOctaves];
+  }
+  return state.tuningOctaves.map((noteWithOctave) => fromMidiNumber(toMidiNumber(noteWithOctave) + state.capo, state.noteNaming));
+}
+
+function getEffectiveTuningNotes() {
+  return getEffectiveTuningOctaves().map((noteWithOctave) => noteWithOctave.replace(/\d+$/, ""));
+}
+
+function getOpenNoteWithCapo(noteWithOctave) {
+  if (!state.capo) {
+    return noteWithOctave;
+  }
+  return fromMidiNumber(toMidiNumber(noteWithOctave) + state.capo, state.noteNaming);
+}
+
+function getScaleNotes(root, scaleType, mode) {
+  const pattern = SCALE_PATTERNS[scaleType];
+  if (!pattern) {
+    return [];
+  }
+  const rootSemitone = NOTE_TO_SEMITONE[normalizeNoteName(root, mode)];
+  return pattern.intervals.map((interval) => getChromaticScale(mode)[(rootSemitone + interval) % 12]);
+}
+
+function syncVisibleNotesForMode() {
+  if (state.highlightMode === "all") {
+    state.visibleNotes = [...getChromaticScale(state.noteNaming)];
+    return;
+  }
+  if (state.highlightMode === "scale") {
+    state.visibleNotes = getScaleNotes(state.selectedScaleRoot, state.selectedScaleType, state.noteNaming);
+    return;
+  }
+  state.visibleNotes = state.visibleNotes.map((note) => normalizeNoteName(note, state.noteNaming));
+}
+
+function updateNoteNaming(mode) {
+  state.noteNaming = mode;
+  state.tuningNotes = state.tuningNotes.map((note) => normalizeNoteName(note, mode));
+  state.tuningOctaves = state.tuningOctaves.map((noteWithOctave) => {
+    const noteName = noteWithOctave.replace(/\d+$/, "");
+    const octave = noteWithOctave.replace(/^[A-G][b#]?/, "");
+    return `${normalizeNoteName(noteName, mode)}${octave}`;
+  });
+  state.selectedScaleRoot = normalizeNoteName(state.selectedScaleRoot, mode);
+  state.savedTunings = state.savedTunings.map((tuning) => ({
+    ...tuning,
+    notes: tuning.notes.map((note) => normalizeNoteName(note, mode)),
+    octaves: tuning.octaves.map((noteWithOctave) => {
+      const noteName = noteWithOctave.replace(/\d+$/, "");
+      const octave = noteWithOctave.replace(/^[A-G][b#]?/, "");
+      return `${normalizeNoteName(noteName, mode)}${octave}`;
+    }),
+  }));
+  const tokens = state.tuningDraftNotesText.trim().split(/\s+/).filter(Boolean);
+  if (tokens.length === 6) {
+    try {
+      state.tuningDraftNotesText = normalizeTuningTokens(tokens, mode).join(" ");
+    } catch (error) {
+      /* keep incomplete draft as-is */
+    }
+  }
+  syncVisibleNotesForMode();
+}
+
+function isMobileViewport() {
+  return window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+}
+
+function getRenderableFretCount() {
+  return isMobileViewport() ? Math.min(state.fretCount, MOBILE_MAX_FRET_COUNT) : state.fretCount;
+}
+
+function getAvailableFretCounts() {
+  return isMobileViewport() ? MOBILE_FRET_COUNTS : DESKTOP_FRET_COUNTS;
+}
+
+function getFretSegmentPercentages(fretCount, scaleLength = 25.5) {
+  const positions = [];
+  for (let fret = 1; fret <= fretCount; fret += 1) {
+    positions.push(scaleLength - scaleLength / 2 ** (fret / 12));
+  }
+  const totalSpan = positions[positions.length - 1] || 1;
+  let previous = 0;
+  return positions.map((position, index) => {
+    const segment = position - previous;
+    previous = position;
+    return {
+      fret: index + 1,
+      percent: (segment / totalSpan) * 100,
+      ratio: segment / (positions[0] || segment || 1),
+    };
+  });
+}
+
+function getIntervalLabel(noteName, root, mode) {
+  const noteSemitone = NOTE_TO_SEMITONE[normalizeNoteName(noteName, mode)];
+  const rootSemitone = NOTE_TO_SEMITONE[normalizeNoteName(root, mode)];
+  return INTERVAL_LABELS[(noteSemitone - rootSemitone + 12) % 12];
+}
+
+function shouldHighlightRoot(noteName) {
+  const normalized = normalizeNoteName(noteName, state.noteNaming);
+  const root = normalizeNoteName(state.selectedScaleRoot, state.noteNaming);
+  return (state.noteDisplayMode === "intervals" || state.highlightMode === "scale") && normalized === root;
+}
+
+function isNoteVisible(noteName) {
+  return state.highlightMode === "all" ? true : state.visibleNotes.includes(noteName);
+}
+
+function getDisplayHtml(noteName) {
+  if (state.noteDisplayMode === "intervals") {
+    return formatLabelWithAccidentals(getIntervalLabel(noteName, state.selectedScaleRoot, state.noteNaming));
+  }
+  return formatLabelWithAccidentals(noteName);
+}
+
+function getFretboardNotes(tuningOctaves, fretCount, mode) {
+  return tuningOctaves.map((openNote, stringIndex) => {
+    const notes = [];
+    const openMidi = toMidiNumber(openNote);
+    for (let fret = 1; fret <= fretCount; fret += 1) {
+      const noteWithOctave = fromMidiNumber(openMidi + fret, mode);
+      const noteName = noteWithOctave.replace(/\d+$/, "");
+      notes.push({
+        noteWithOctave,
+        noteName,
+        displayHtml: getDisplayHtml(noteName),
+        stringIndex,
+        fretIndex: fret,
+        isVisible: isNoteVisible(noteName),
+        isRoot: shouldHighlightRoot(noteName),
+      });
+    }
+    return notes;
+  });
+}
+
+function createButton({ label, className = "", isActive = false, isDimmed = false, onClick }) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.className = className;
+  if (isActive) {
+    button.classList.add("is-active");
+  }
+  if (isDimmed) {
+    button.classList.add("is-dimmed");
+  }
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+function buildLanguageSwitcher(extraClass = "") {
+  const switcher = document.createElement("div");
+  switcher.className = `language-switcher${state.languageMenuOpen ? " is-open" : ""}${extraClass ? ` ${extraClass}` : ""}`;
+
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.className = "language-trigger";
+  trigger.setAttribute("aria-haspopup", "menu");
+  trigger.setAttribute("aria-expanded", state.languageMenuOpen ? "true" : "false");
+  trigger.setAttribute("aria-label", "Select language");
+  trigger.innerHTML = `
+    <span class="language-trigger-copy">
+      <span class="language-flag language-flag--${state.language}${state.language === "ru" ? " language-flag--square" : ""}"></span>
+      <span class="language-label">${escapeHtml(LANGUAGES.find((language) => language.id === state.language)?.label || "English")}</span>
+    </span>
+    <span class="language-caret" aria-hidden="true"></span>
+  `;
+
+  const menu = document.createElement("div");
+  menu.className = "language-menu";
+  menu.setAttribute("role", "menu");
+  menu.setAttribute("aria-label", "Languages");
+
+  trigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    state.languageMenuOpen = !state.languageMenuOpen;
+    render();
+  });
+
+  LANGUAGES.forEach((language) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `language-option${language.id === state.language ? " is-active" : ""}`;
+    button.setAttribute("role", "menuitemradio");
+    button.setAttribute("aria-checked", String(language.id === state.language));
+    button.addEventListener("click", () => {
+      state.language = language.id;
+      state.languageMenuOpen = false;
+      render();
+    });
+
+    const flag = document.createElement("span");
+    flag.className = `language-flag language-flag--${language.id}${language.square ? " language-flag--square" : ""}`;
+
+    const label = document.createElement("span");
+    label.className = "language-label";
+    label.textContent = language.label;
+
+    const status = document.createElement("span");
+    status.className = "language-option-status";
+    status.setAttribute("aria-hidden", "true");
+    status.textContent = language.id === state.language ? "\u2022" : "";
+
+    button.append(flag, label, status);
+    menu.appendChild(button);
+  });
+
+  switcher.append(trigger, menu);
+  return switcher;
+}
+
+function renderHero() {
+  if (!heroNode) {
+    return;
+  }
+  document.documentElement.lang = state.language;
+  document.title = t("documentTitle");
+  if (fretboardPageNode) {
+    fretboardPageNode.setAttribute("aria-label", t("fretboardAria"));
+  }
+  heroNode.innerHTML = `
+    <div class="hero-topbar">
+      <p class="eyebrow">Open Tunings Charts</p>
+      <div class="desktop-language-slot"></div>
+    </div>
+    <h1 id="hero-title">${escapeHtml(t("heroTitle"))}</h1>
+    <div class="status-toast-wrap"></div>
+  `;
+  heroNode.querySelector(".desktop-language-slot")?.appendChild(buildLanguageSwitcher("language-switcher--desktop"));
+  renderToast(heroNode.querySelector(".status-toast-wrap"));
+}
+
+function renderToast(targetNode) {
+  if (!targetNode) {
+    return;
+  }
+  targetNode.innerHTML = "";
+  if (!state.messageKey) {
+    return;
+  }
+  const toast = document.createElement("div");
+  toast.className = `status-toast ${state.messageType || "is-success"}`;
+  toast.textContent = getMessageText();
+  targetNode.appendChild(toast);
+}
+
+function setupGlobalListeners() {
+  document.addEventListener("click", (event) => {
+    if (!state.languageMenuOpen) {
+      return;
+    }
+    if (!(event.target instanceof Element) || !event.target.closest(".language-switcher")) {
+      state.languageMenuOpen = false;
+      render();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && state.languageMenuOpen) {
+      state.languageMenuOpen = false;
+      render();
+    }
+  });
+}
+
+function buildSavedTuningsMarkup() {
+  if (!state.savedTunings.length) {
+    return `<p class="saved-tunings-empty">${escapeHtml(t("noSavedTunings"))}</p>`;
+  }
+  return state.savedTunings
+    .map((tuning) => {
+      const isActive = state.tuningId === `saved:${tuning.id}`;
+      return `
+        <div class="saved-tuning-row${isActive ? " is-active" : ""}">
+          <button type="button" class="saved-tuning-apply${isActive ? " is-active" : ""}" data-saved-apply="${escapeHtml(tuning.id)}">
+            <span class="saved-tuning-label">${escapeHtml(tuning.label)}</span>
+            <span class="saved-tuning-notes">${escapeHtml(tuning.octaves.join(" "))}</span>
+          </button>
+          <button type="button" class="saved-tuning-delete" data-saved-delete="${escapeHtml(tuning.id)}">${escapeHtml(t("deleteSaved"))}</button>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderControls() {
+  controlsNode.innerHTML = "";
+  const availableFretCounts = getAvailableFretCounts();
+  const renderedFretCount = getRenderableFretCount();
+
+  const mobileTitle = document.createElement("section");
+  mobileTitle.className = "mobile-hero-title";
+  mobileTitle.innerHTML = `<h1>${escapeHtml(t("heroTitle"))}</h1>`;
+
+  const noteCard = document.createElement("section");
+  noteCard.className = "control-card control-card--wide control-card--note";
+  noteCard.innerHTML = `
+    <h2>${escapeHtml(t("sectionNotes"))}</h2>
+    <div class="chip-row" id="note-chip-row"></div>
+  `;
+
+  const scaleCard = document.createElement("section");
+  scaleCard.className = "control-card control-card--half control-card--scale";
+  scaleCard.innerHTML = `
+    <h2>${escapeHtml(t("sectionScale"))}</h2>
+    <div class="scale-grid">
+      <div class="field-row">
+        <label for="scale-root">${escapeHtml(t("scaleRootLabel"))}</label>
+        <select id="scale-root" name="scale-root"></select>
+      </div>
+      <div class="field-row">
+        <label for="scale-type">${escapeHtml(t("scaleTypeLabel"))}</label>
+        <select id="scale-type" name="scale-type"></select>
+      </div>
+    </div>
+    <p class="small-copy" id="scale-summary"></p>
+  `;
+
+  const modeCard = document.createElement("section");
+  modeCard.className = "control-card control-card--half control-card--mode";
+  modeCard.innerHTML = `
+    <h2>${escapeHtml(t("sectionMode"))}</h2>
+    <div class="card-stack">
+      <div class="field-row field-row--full">
+        <span>${escapeHtml(t("highlightModeLabel"))}</span>
+        <div class="toggle-row" id="highlight-mode-row"></div>
+      </div>
+      <div class="field-row field-row--full field-row--actions">
+        <div class="toggle-row" id="mode-actions-row"></div>
+      </div>
+      <div class="display-grid display-grid--compact">
+        <div class="field-row">
+          <span>${escapeHtml(t("inlayStyleLabel"))}</span>
+          <div class="toggle-row" id="inlay-style-row"></div>
+        </div>
+        <div class="field-row">
+          <label for="fret-count">${escapeHtml(t("fretCountLabel"))}</label>
+          <select id="fret-count" name="fret-count"></select>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const displayCard = document.createElement("section");
+  displayCard.className = "control-card control-card--half control-card--display";
+  displayCard.innerHTML = `
+    <h2>${escapeHtml(t("sectionDisplay"))}</h2>
+    <div class="card-stack">
+      <div class="display-grid display-grid--compact">
+        <div class="field-row">
+          <span>${escapeHtml(t("noteNamingLabel"))}</span>
+          <div class="toggle-row" id="note-naming-row"></div>
+        </div>
+        <div class="field-row">
+          <span>${escapeHtml(t("noteDisplayLabel"))}</span>
+          <div class="toggle-row" id="note-display-row"></div>
+        </div>
+        <div class="field-row">
+          <span>${escapeHtml(t("handednessLabel"))}</span>
+          <div class="toggle-row" id="handedness-row"></div>
+        </div>
+        <div class="field-row">
+          <span>${escapeHtml(t("fretLayoutLabel"))}</span>
+          <div class="toggle-row" id="fret-layout-row"></div>
+        </div>
+      </div>
+      <div class="display-grid display-grid--compact display-grid--settings">
+        <div class="field-row">
+          <label for="scale-length">${escapeHtml(t("scaleLengthLabel"))}</label>
+          <select id="scale-length" name="scale-length">
+            <option value="25.5">${escapeHtml(t("scaleLengthStandard"))}</option>
+            <option value="24.75">${escapeHtml(t("scaleLengthGibson"))}</option>
+            <option value="27">${escapeHtml(t("scaleLengthBaritone"))}</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label for="capo">${escapeHtml(t("capoLabel"))}</label>
+          <select id="capo" name="capo"></select>
+          <div class="toggle-row" id="capo-actions-row"></div>
+        </div>
+      </div>
+      <div class="field-row field-row--full field-row--actions">
+        <div class="toggle-row control-actions-row" id="display-actions-row"></div>
+      </div>
+    </div>
+  `;
+
+  const tuningCard = document.createElement("section");
+  tuningCard.className = "control-card control-card--wide control-card--tuning";
+  tuningCard.innerHTML = `
+    <h2>${escapeHtml(t("sectionTunings"))}</h2>
+    <div class="presets-row" id="preset-tunings"></div>
+    <p class="small-copy">${escapeHtml(t("tuningsHelp"))}</p>
+    <div class="saved-tunings-section">
+      <div class="saved-tunings-header">${escapeHtml(t("savedTuningsLabel"))}</div>
+      <div class="saved-tunings-list" id="saved-tunings-list">${buildSavedTuningsMarkup()}</div>
+    </div>
+    <div class="custom-grid">
+      <div class="field-row">
+        <label for="custom-label">${escapeHtml(t("customLabel"))}</label>
+        <input id="custom-label" name="custom-label" placeholder="${escapeHtml(t("customLabelPlaceholder"))}" value="${escapeHtml(state.tuningDraftLabel)}" />
+      </div>
+      <div class="field-row">
+        <label for="custom-notes">${escapeHtml(t("customNotes"))}</label>
+        <input id="custom-notes" name="custom-notes" placeholder="${escapeHtml(t("customNotesPlaceholder"))}" value="${escapeHtml(state.tuningDraftNotesText)}" />
+      </div>
+    </div>
+    <div class="toggle-row" id="custom-actions"></div>
+    <p class="message ${state.inlineMessageType}" id="message-area">${escapeHtml(state.inlineMessageText)}</p>
+  `;
+
+  const mobileLanguage = document.createElement("section");
+  mobileLanguage.className = "mobile-language-footer";
+  mobileLanguage.appendChild(buildLanguageSwitcher("language-switcher--mobile"));
+
+  const leftColumn = document.createElement("div");
+  leftColumn.className = "controls-column controls-column--left";
+  leftColumn.append(noteCard, tuningCard);
+
+  const rightColumn = document.createElement("div");
+  rightColumn.className = "controls-column controls-column--right";
+  rightColumn.append(scaleCard, modeCard, displayCard);
+
+  controlsNode.append(mobileTitle, leftColumn, rightColumn, mobileLanguage);
+
+  const presetRow = tuningCard.querySelector("#preset-tunings");
+  PRESET_TUNINGS.forEach((preset) => {
+    presetRow.append(
+      createButton({
+        label: preset.label,
+        className: "preset-button",
+        isActive: preset.id === state.tuningId,
+        onClick: () => {
+          applyPresetTuning(preset.id);
+          render();
+        },
+      })
+    );
+  });
+
+  tuningCard.querySelectorAll("[data-saved-apply]").forEach((button) => {
+    button.addEventListener("click", () => {
+      applySavedTuning(button.getAttribute("data-saved-apply"));
+      render();
+    });
+  });
+
+  tuningCard.querySelectorAll("[data-saved-delete]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const savedId = button.getAttribute("data-saved-delete");
+      const saved = getSavedTuningById(savedId);
+      if (!saved) {
+        return;
+      }
+      state.savedTunings = state.savedTunings.filter((item) => item.id !== savedId);
+      if (state.tuningId === `saved:${savedId}`) {
+        applyPresetTuning(defaultTuning.id, false);
+      }
+      setInlineMessage("", "");
+      setMessage("msgSavedDeleted", "is-success", { label: saved.label });
+      render();
+    });
+  });
+
+  const labelInput = tuningCard.querySelector("#custom-label");
+  const noteInput = tuningCard.querySelector("#custom-notes");
+  const setDraftFromInputs = () => {
+    state.tuningDraftLabel = labelInput.value;
+    state.tuningDraftNotesText = noteInput.value;
+  };
+
+  labelInput.addEventListener("input", setDraftFromInputs);
+  noteInput.addEventListener("input", setDraftFromInputs);
+
+  const customActions = tuningCard.querySelector("#custom-actions");
+  customActions.append(
+    createButton({
+      label: t("applyCustom"),
+      className: "toggle-button",
+      onClick: () => {
+        try {
+          setDraftFromInputs();
+          const tuning = buildTuningFromInput(state.tuningDraftLabel, state.tuningDraftNotesText);
+          applyTuningObject(tuning, {
+            tuningId: "custom",
+            withMessage: true,
+            messageKey: "msgCustomApplied",
+            messageParams: { label: tuning.label },
+          });
+          setInlineMessage("", "");
+          render();
+        } catch (error) {
+          setInlineMessage(error.message, "is-error");
+          render();
+        }
+      },
+    }),
+    createButton({
+      label: t("saveCustom"),
+      className: "toggle-button",
+      onClick: () => {
+        try {
+          setDraftFromInputs();
+          const tuning = buildTuningFromInput(state.tuningDraftLabel, state.tuningDraftNotesText);
+          const existing = getSavedTuningLabelMatch(tuning.label);
+          const savedTuning = {
+            id: existing?.id || createSavedTuningId(tuning.label),
+            label: tuning.label,
+            notes: [...tuning.notes],
+            octaves: [...tuning.octaves],
+          };
+          state.savedTunings = existing
+            ? state.savedTunings.map((item) => (item.id === existing.id ? savedTuning : item))
+            : [...state.savedTunings, savedTuning];
+          applyTuningObject(savedTuning, { tuningId: `saved:${savedTuning.id}` });
+          setInlineMessage("", "");
+          setMessage("msgTuningSaved", "is-success", { label: savedTuning.label });
+          render();
+        } catch (error) {
+          setInlineMessage(error.message, "is-error");
+          render();
+        }
+      },
+    })
+  );
+
+  const noteNamingRow = displayCard.querySelector("#note-naming-row");
+  [
+    { id: "flats", label: t("namingFlats") },
+    { id: "sharps", label: t("namingSharps") },
+  ].forEach((mode) => {
+    noteNamingRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.noteNaming === mode.id,
+        onClick: () => {
+          updateNoteNaming(mode.id);
+          setMessage(mode.id === "flats" ? "msgFlats" : "msgSharps", "is-success");
+          render();
+        },
+      })
+    );
+  });
+
+  const noteDisplayRow = displayCard.querySelector("#note-display-row");
+  [
+    { id: "notes", label: t("displayNotes") },
+    { id: "intervals", label: t("displayIntervals") },
+  ].forEach((mode) => {
+    noteDisplayRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.noteDisplayMode === mode.id,
+        onClick: () => {
+          state.noteDisplayMode = mode.id;
+          render();
+        },
+      })
+    );
+  });
+
+  const highlightModeRow = modeCard.querySelector("#highlight-mode-row");
+  [
+    { id: "all", label: t("highlightAll") },
+    { id: "custom", label: t("highlightCustom") },
+    { id: "scale", label: t("highlightScale") },
+  ].forEach((mode) => {
+    highlightModeRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.highlightMode === mode.id,
+        onClick: () => {
+          state.highlightMode = mode.id;
+          syncVisibleNotesForMode();
+          render();
+        },
+      })
+    );
+  });
+
+  modeCard.querySelector("#mode-actions-row").append(
+    createButton({
+      label: t("hideAll"),
+      className: "toggle-button",
+      onClick: () => {
+        state.highlightMode = "custom";
+        state.visibleNotes = [];
+        setMessage("msgAllHidden", "is-success");
+        render();
+      },
+    }),
+    createButton({
+      label: t("showAll"),
+      className: "toggle-button",
+      onClick: () => {
+        state.highlightMode = "all";
+        syncVisibleNotesForMode();
+        setMessage("msgAllShown", "is-success");
+        render();
+      },
+    })
+  );
+
+  const handednessRow = displayCard.querySelector("#handedness-row");
+  [
+    { id: "right", label: t("handednessRight") },
+    { id: "left", label: t("handednessLeft") },
+  ].forEach((mode) => {
+    handednessRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.handedness === mode.id,
+        onClick: () => {
+          state.handedness = mode.id;
+          render();
+        },
+      })
+    );
+  });
+
+  const inlayStyleRow = modeCard.querySelector("#inlay-style-row");
+  [
+    { id: "dots", label: t("inlayDots") },
+    { id: "blocks", label: t("inlayBlocks") },
+  ].forEach((mode) => {
+    inlayStyleRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.inlayStyle === mode.id,
+        onClick: () => {
+          state.inlayStyle = mode.id;
+          render();
+        },
+      })
+    );
+  });
+
+  const fretLayoutRow = displayCard.querySelector("#fret-layout-row");
+  [
+    { id: "chart", label: t("fretLayoutChart") },
+    { id: "real", label: t("fretLayoutReal") },
+  ].forEach((mode) => {
+    fretLayoutRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.fretLayout === mode.id,
+        onClick: () => {
+          state.fretLayout = mode.id;
+          render();
+        },
+      })
+    );
+  });
+
+  displayCard.querySelector("#display-actions-row").append(
+    createButton({
+      label: t("exportPng"),
+      className: "toggle-button",
+      onClick: () => {
+        exportFretboardPng();
+      },
+    })
+  );
+
+  const fretSelect = modeCard.querySelector("#fret-count");
+  availableFretCounts.forEach((count) => {
+    const option = document.createElement("option");
+    option.value = String(count);
+    option.textContent = String(count);
+    option.selected = count === renderedFretCount;
+    fretSelect.append(option);
+  });
+  fretSelect.value = String(renderedFretCount);
+  fretSelect.addEventListener("change", (event) => {
+    state.fretCount = Number(event.target.value);
+    render();
+  });
+
+  const scaleLengthSelect = displayCard.querySelector("#scale-length");
+  scaleLengthSelect.value = String(state.scaleLength);
+  scaleLengthSelect.addEventListener("change", (event) => {
+    state.scaleLength = Number(event.target.value);
+    render();
+  });
+
+  const capoSelect = displayCard.querySelector("#capo");
+  CAPO_OPTIONS.forEach((capo) => {
+    const option = document.createElement("option");
+    option.value = String(capo);
+    option.textContent = String(capo);
+    option.selected = capo === state.capo;
+    capoSelect.append(option);
+  });
+  capoSelect.value = String(state.capo);
+  capoSelect.addEventListener("change", (event) => {
+    state.capo = Number(event.target.value);
+    render();
+  });
+
+  displayCard.querySelector("#capo-actions-row").append(
+    createButton({
+      label: "Capo Off",
+      className: "toggle-button",
+      isDimmed: state.capo === 0,
+      onClick: () => {
+        state.capo = 0;
+        render();
+      },
+    })
+  );
+
+  const noteChipRow = noteCard.querySelector("#note-chip-row");
+  getChromaticScale(state.noteNaming).forEach((note) => {
+    noteChipRow.append(
+      createButton({
+        label: note,
+        className: "chip",
+        isActive: state.visibleNotes.includes(note),
+        isDimmed: state.highlightMode !== "all" && state.highlightMode !== "custom" && !state.visibleNotes.includes(note),
+        onClick: () => {
+          state.highlightMode = "custom";
+          if (state.visibleNotes.includes(note)) {
+            state.visibleNotes = state.visibleNotes.filter((item) => item !== note);
+          } else {
+            state.visibleNotes = [...state.visibleNotes, note];
+          }
+          render();
+        },
+      })
+    );
+  });
+
+  const scaleRoot = scaleCard.querySelector("#scale-root");
+  getChromaticScale(state.noteNaming).forEach((note) => {
+    const option = document.createElement("option");
+    option.value = note;
+    option.textContent = note;
+    option.selected = state.selectedScaleRoot === note;
+    scaleRoot.append(option);
+  });
+  scaleRoot.addEventListener("change", (event) => {
+    state.selectedScaleRoot = event.target.value;
+    if (state.highlightMode === "scale") {
+      syncVisibleNotesForMode();
+    }
+    render();
+  });
+
+  const scaleType = scaleCard.querySelector("#scale-type");
+  Object.keys(SCALE_PATTERNS).forEach((id) => {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = getScaleLabel(id);
+    option.selected = state.selectedScaleType === id;
+    scaleType.append(option);
+  });
+  scaleType.addEventListener("change", (event) => {
+    state.selectedScaleType = event.target.value;
+    if (state.highlightMode === "scale") {
+      syncVisibleNotesForMode();
+    }
+    render();
+  });
+
+  scaleCard.querySelector("#scale-summary").innerHTML = escapeHtml(
+    t("scaleSummary", {
+      root: state.selectedScaleRoot,
+      label: getScaleLabel(state.selectedScaleType),
+      notes: getScaleNotes(state.selectedScaleRoot, state.selectedScaleType, state.noteNaming).join(" "),
+    })
+  );
+}
+
+function applyResponsiveNoteSizing(fretsNode, renderedFretCount) {
+  guitarNode.style.removeProperty("--note-size");
+  guitarNode.style.removeProperty("--note-font-size");
+  const fretNodes = fretsNode.querySelectorAll(".fret");
+  const lastFret = fretNodes[fretNodes.length - 1];
+  if (!lastFret) {
+    return;
+  }
+  const lastFretRect = lastFret.getBoundingClientRect();
+  const lastFretWidth = isMobileViewport() ? Math.min(lastFretRect.width, lastFretRect.height) : lastFretRect.width;
+  if (!lastFretWidth) {
+    return;
+  }
+
+  let noteSize;
+  let noteFontSize;
+  if (isMobileViewport()) {
+    noteSize = Math.max(20, Math.floor(lastFretWidth * 0.98));
+    noteFontSize = Math.min(17, Math.max(10.5, noteSize * 0.42));
+  } else if (state.fretLayout === "real" && renderedFretCount >= 21) {
+    noteSize = Math.max(16, Math.floor(lastFretWidth));
+    noteFontSize = Math.min(16, Math.max(10.5, noteSize * 0.42));
+  } else {
+    noteSize = 50;
+    noteFontSize = 16;
+  }
+
+  guitarNode.style.setProperty("--note-size", `${noteSize}px`);
+  guitarNode.style.setProperty("--note-font-size", `${noteFontSize}px`);
+}
+
+function renderGuitar() {
+  const renderedFretCount = getRenderableFretCount();
+  const noteGrid = getFretboardNotes(state.tuningOctaves, renderedFretCount, state.noteNaming);
+  const reversedOpenNotes = [...state.tuningOctaves]
+    .reverse()
+    .map((noteWithOctave) => getOpenNoteWithCapo(noteWithOctave).replace(/\d+$/, ""));
+
+  guitarNode.className = `guitar ${state.handedness === "left" ? "left-handed" : "right-handed"}`;
+  guitarNode.dataset.fretCount = String(renderedFretCount);
+  guitarNode.dataset.inlayStyle = state.inlayStyle;
+  guitarNode.dataset.fretLayout = state.fretLayout;
+  guitarNode.dataset.capo = String(state.capo);
+  guitarNode.style.width = state.fretLayout === "real" ? `${(state.scaleLength / 25.5) * 100}%` : "100%";
+  guitarNode.innerHTML = "";
+
+  const nut = document.createElement("div");
+  nut.className = "nut";
+
+  const strings = document.createElement("div");
+  strings.className = "strings";
+
+  const fretboard = document.createElement("div");
+  fretboard.className = "fretboard";
+
+  const frets = document.createElement("div");
+  frets.className = "frets";
+  const fretMetrics = getFretSegmentPercentages(renderedFretCount, state.scaleLength);
+
+  if (state.capo > 0) {
+    const capoBadge = document.createElement("div");
+    capoBadge.className = "capo-badge";
+    capoBadge.textContent = t("capoBadge", { capo: state.capo });
+    nut.appendChild(capoBadge);
+  }
+
+  reversedOpenNotes.forEach((noteName, index) => {
+    const string = document.createElement("div");
+    string.className = `open-string string-${index + 1}`;
+    if (state.capo === 0) {
+      const isVisible = isNoteVisible(noteName);
+      const isRoot = shouldHighlightRoot(noteName);
+
+      const badge = document.createElement("div");
+      badge.className = `open-note${isVisible ? " is-open-active" : ""}${isRoot ? " is-open-root-note" : ""}`;
+      badge.dataset.note = noteName;
+      badge.innerHTML = getDisplayHtml(noteName);
+
+      string.appendChild(badge);
+    }
+    nut.appendChild(string);
+  });
+
+  for (let fretIndex = 1; fretIndex <= renderedFretCount; fretIndex += 1) {
+    const fret = document.createElement("div");
+    fret.className = `fret fret-${fretIndex}`;
+    fret.dataset.fret = String(fretIndex);
+    if (state.capo > 0 && fretIndex <= state.capo) {
+      fret.classList.add("is-capo-muted");
+    }
+
+    if (state.fretLayout === "real") {
+      const metric = fretMetrics[fretIndex - 1];
+      fret.style.flex = `0 0 ${metric.percent}%`;
+      fret.style.width = `${metric.percent}%`;
+      fret.style.setProperty("--fret-ratio", String(metric.ratio));
+    } else {
+      fret.style.flex = "1";
+      fret.style.width = "";
+      fret.style.setProperty("--fret-ratio", "1");
+    }
+
+    if (state.inlayStyle === "blocks") {
+      if (BLOCK_MARKER_FRETS.has(fretIndex)) {
+        fret.classList.add("has-block-marker");
+      }
+    } else {
+      if (SINGLE_MARKER_FRETS.has(fretIndex)) {
+        fret.classList.add("has-marker");
+      }
+      if (DOUBLE_MARKER_FRETS.has(fretIndex)) {
+        fret.classList.add("has-double-marker");
+        const doubleMarker = document.createElement("div");
+        doubleMarker.className = "double-marker";
+        fret.appendChild(doubleMarker);
+      }
+    }
+
+    for (let stringIndex = 5; stringIndex >= 0; stringIndex -= 1) {
+      const note = noteGrid[stringIndex][fretIndex - 1];
+      const isBlockedByCapo = state.capo > 0 && fretIndex < state.capo;
+      const noteNode = document.createElement("div");
+      noteNode.className = `note${note.isVisible && !isBlockedByCapo ? "" : " is-hidden-note"}${note.isRoot ? " is-root-note" : ""}`;
+      noteNode.dataset.note = note.noteName;
+      noteNode.dataset.noteWithOctave = note.noteWithOctave;
+      noteNode.innerHTML = note.displayHtml;
+      fret.appendChild(noteNode);
+    }
+
+    frets.appendChild(fret);
+  }
+
+  for (let index = 1; index <= 6; index += 1) {
+    const stringLine = document.createElement("div");
+    stringLine.className = `string-line string-${index}`;
+    strings.appendChild(stringLine);
+  }
+
+  if (state.capo > 0 && state.capo <= renderedFretCount) {
+    const capoClamp = document.createElement("div");
+    capoClamp.className = `capo-clamp capo-clamp--${state.handedness === "left" ? "left" : "right"}`;
+    const metricSlice = fretMetrics.slice(0, state.capo);
+    const cumulativeBefore = metricSlice.slice(0, -1).reduce((sum, metric) => sum + metric.percent, 0);
+    const currentWidth = metricSlice[metricSlice.length - 1]?.percent ?? (100 / renderedFretCount);
+    const centerPercent =
+      state.fretLayout === "real"
+        ? cumulativeBefore + currentWidth * 0.5
+        : ((state.capo - 0.5) / renderedFretCount) * 100;
+    if (state.handedness === "left") {
+      capoClamp.style.right = `${centerPercent}%`;
+    } else {
+      capoClamp.style.left = `${centerPercent}%`;
+    }
+    fretboard.appendChild(capoClamp);
+  }
+
+  fretboard.append(frets, strings);
+  guitarNode.append(nut, fretboard);
+  applyResponsiveNoteSizing(frets, renderedFretCount);
+}
+
+function buildUrlState() {
+  const params = new URLSearchParams();
+  params.set("lang", state.language);
+  params.set("capo", String(state.capo));
+  params.set("display", state.noteDisplayMode);
+  params.set("root", state.selectedScaleRoot);
+  params.set("scale", state.selectedScaleType);
+  params.set("highlight", state.highlightMode);
+  params.set("naming", state.noteNaming);
+  params.set("hand", state.handedness);
+  params.set("inlays", state.inlayStyle);
+  params.set("layout", state.fretLayout);
+  params.set("scaleLen", String(state.scaleLength));
+  params.set("frets", String(state.fretCount));
+  if (state.highlightMode === "custom") {
+    params.set("visible", state.visibleNotes.join(","));
+  }
+
+  if (getPresetById(state.tuningId)) {
+    params.set("t", state.tuningId);
+  } else {
+    params.set("t", state.tuningId.startsWith("saved:") ? "saved" : "custom");
+    params.set("tl", state.tuningName);
+    params.set("tn", state.tuningOctaves.join(","));
+  }
+
+  return params;
+}
+
+function syncUrlState() {
+  const params = buildUrlState();
+  window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+}
+
+function loadStateFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (!Array.from(params.keys()).length) {
+    return;
+  }
+
+  const snapshot = {};
+  if (params.has("lang")) snapshot.language = params.get("lang");
+  if (params.has("capo")) snapshot.capo = Number(params.get("capo"));
+  if (params.has("display")) snapshot.noteDisplayMode = params.get("display");
+  if (params.has("root")) snapshot.selectedScaleRoot = params.get("root");
+  if (params.has("scale")) snapshot.selectedScaleType = params.get("scale");
+  if (params.has("highlight")) snapshot.highlightMode = params.get("highlight");
+  if (params.has("naming")) snapshot.noteNaming = params.get("naming");
+  if (params.has("hand")) snapshot.handedness = params.get("hand");
+  if (params.has("inlays")) snapshot.inlayStyle = params.get("inlays");
+  if (params.has("layout")) snapshot.fretLayout = params.get("layout");
+  if (params.has("scaleLen")) snapshot.scaleLength = Number(params.get("scaleLen"));
+  if (params.has("frets")) snapshot.fretCount = Number(params.get("frets"));
+  if (params.has("visible")) {
+    snapshot.visibleNotes = params.get("visible").split(",").map((value) => value.trim()).filter(Boolean);
+  } else if (params.get("highlight") === "custom") {
+    snapshot.visibleNotes = [];
+  }
+
+  const tuningId = params.get("t");
+  const tuningLabel = params.get("tl");
+  const tuningNotes = params.get("tn");
+  if (tuningId) {
+    if (getPresetById(tuningId)) {
+      snapshot.tuningId = tuningId;
+    } else if (tuningNotes) {
+      snapshot.tuningId = tuningId === "saved" ? "saved:url" : "custom";
+      snapshot.tuningName = tuningLabel || t("customTuningDefault");
+      snapshot.tuningOctaves = tuningNotes.split(",").map((value) => value.trim()).filter(Boolean);
+    }
+  }
+
+  applySnapshot(snapshot);
+}
+
+function getStylesheetText() {
+  const chunks = [];
+  for (const sheet of Array.from(document.styleSheets)) {
+    try {
+      const rules = Array.from(sheet.cssRules || []);
+      chunks.push(rules.map((rule) => rule.cssText).join("\n"));
+    } catch (error) {
+      continue;
+    }
+  }
+  return chunks.join("\n");
+}
+
+async function exportFretboardPng() {
+  try {
+    const rect = guitarNode.getBoundingClientRect();
+    const exportWidth = Math.ceil(rect.width);
+    const exportHeight = Math.ceil(rect.height + 72);
+    const clone = guitarNode.cloneNode(true);
+    clone.classList.add("is-export-clone");
+    clone.style.width = `${rect.width}px`;
+    clone.style.margin = "0";
+
+    const svgString = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${exportWidth}" height="${exportHeight}" viewBox="0 0 ${exportWidth} ${exportHeight}">
+        <foreignObject x="0" y="0" width="100%" height="100%">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="width:${exportWidth}px;height:${exportHeight}px;padding:0 0 72px;margin:0;background:transparent;box-sizing:border-box;">
+            <style>${getStylesheetText()}</style>
+            ${clone.outerHTML}
+          </div>
+        </foreignObject>
+      </svg>
+    `;
+
+    const image = new Image();
+    const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
+
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = reject;
+      image.src = dataUrl;
+    });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = exportWidth * 2;
+    canvas.height = exportHeight * 2;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("Canvas context not available");
+    }
+    context.scale(2, 2);
+    context.drawImage(image, 0, 0, exportWidth, exportHeight);
+
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = "fretboard-lab.png";
+    link.click();
+
+    setMessage("msgPngExported", "is-success");
+    render();
+  } catch (error) {
+    setMessage("msgPngFailed", "is-error");
+    render();
+  }
+}
+
+function render() {
+  syncVisibleNotesForMode();
+  renderHero();
+  renderControls();
+  renderGuitar();
+  syncUrlState();
+  saveState();
+}
+
+loadState();
+loadStateFromUrl();
+setupGlobalListeners();
+window.addEventListener("resize", render);
+if (!state.tuningDraftLabel || !state.tuningDraftNotesText) {
+  syncDraftFromCurrentTuning();
+}
+render();
