@@ -86,6 +86,54 @@ For frontend work, always check both:
 - how it looks
 - how it behaves after state changes
 
+## Definition Of Done
+
+Use this as the finish line before handing work back or committing.
+
+UI polish is done when:
+
+- the target screen or component looks correct in the browser
+- desktop behavior is preserved unless the task is desktop-specific
+- mobile behavior is checked if responsive CSS changed
+- controls do not jump, overlap, or become unreadable after interaction
+- `node --check app-main.js` passes if JavaScript changed
+
+Music logic is done when:
+
+- the requested tuning, scale, chord, capo, or fret-focus scenario works
+- Standard tuning and FACGCE are checked when chord or scale logic changes
+- URL state still reflects the selected mode
+- the result is musically useful, not only mathematically valid
+- `node --check app-main.js` passes
+
+Bugfix work is done when:
+
+- the bug is reproduced or clearly inspected
+- the fix is narrow
+- the original scenario is verified after the fix
+- nearby behavior is smoke-tested if the touched code is shared
+
+Docs work is done when:
+
+- the doc answers the next likely chat or developer question
+- instructions are short, current, and actionable
+- no implementation detail is documented unless it affects workflow or decisions
+
+## Handoff Template
+
+Use this when passing work to a new chat or closing a larger task:
+
+```text
+Branch: codex/<branch-name>
+Goal: <what this branch/chat is trying to finish>
+Changed: <short list of important changes>
+Verified: <commands and browser scenarios checked>
+Not verified: <anything skipped or risky>
+Next step: <one concrete follow-up>
+```
+
+Keep handoffs short. The goal is to preserve momentum, not recreate the whole chat.
+
 ## Bugfix Workflow
 
 For bugfix chats, ask Codex to reproduce or inspect the issue first.
