@@ -302,6 +302,10 @@ const DOUBLE_MARKER_FRETS = new Set([12, 24]);
 const BLOCK_MARKER_FRETS = new Set([3, 5, 7, 9, 12, 15, 17, 19, 21, 24]);
 const STORAGE_KEY = "open-tunings-fretboard-state-v2";
 const LEGACY_STORAGE_KEY = "open-tunings-fretboard-state-v1";
+const MOBILE_MEDIA_QUERY = "(max-width: 720px)";
+const MOBILE_MAX_FRET_COUNT = 13;
+const MOBILE_FRET_COUNTS = [12, 13];
+const DESKTOP_FRET_COUNTS = [12, 13, 15, 21, 22, 24];
 
 const defaultTuning = PRESET_TUNINGS[0];
 
@@ -484,7 +488,7 @@ function loadState() {
     state.scaleLength = parsed.scaleLength;
   }
 
-  if (typeof parsed.fretCount === "number" && [12, 13, 15, 21, 22, 24].includes(parsed.fretCount)) {
+  if (typeof parsed.fretCount === "number" && DESKTOP_FRET_COUNTS.includes(parsed.fretCount)) {
     state.fretCount = parsed.fretCount;
   }
 
@@ -581,6 +585,50 @@ function getFretSegmentPercentages(fretCount, scaleLength = 25.5) {
       ratio: segment / (positions[0] || segment || 1),
     };
   });
+}
+
+function isMobileViewport() {
+  return window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+}
+
+function getRenderableFretCount() {
+  return isMobileViewport() ? Math.min(state.fretCount, MOBILE_MAX_FRET_COUNT) : state.fretCount;
+}
+
+function getAvailableFretCounts() {
+  return isMobileViewport() ? MOBILE_FRET_COUNTS : DESKTOP_FRET_COUNTS;
+}
+
+function applyResponsiveNoteSizing(fretsNode, renderedFretCount) {
+  guitarNode.style.removeProperty("--note-size");
+  guitarNode.style.removeProperty("--note-font-size");
+
+  const fretNodes = fretsNode.querySelectorAll(".fret");
+  const lastFret = fretNodes[fretNodes.length - 1];
+  if (!lastFret) {
+    return;
+  }
+
+  const lastFretRect = lastFret.getBoundingClientRect();
+  const lastFretWidth = isMobileViewport() ? Math.min(lastFretRect.width, lastFretRect.height) : lastFretRect.width;
+  if (!lastFretWidth) {
+    return;
+  }
+
+  if (isMobileViewport()) {
+    const noteSize = Math.max(21, Math.floor(lastFretWidth * 1.12));
+    const noteFontSize = Math.min(17, Math.max(10.5, noteSize * 0.42));
+    guitarNode.style.setProperty("--note-size", `${noteSize}px`);
+    guitarNode.style.setProperty("--note-font-size", `${noteFontSize}px`);
+    return;
+  }
+
+  if (state.fretLayout === "real" && renderedFretCount >= 21) {
+    const noteSize = Math.max(16, Math.floor(lastFretWidth));
+    const noteFontSize = Math.min(16, Math.max(10.5, noteSize * 0.42));
+    guitarNode.style.setProperty("--note-size", `${noteSize}px`);
+    guitarNode.style.setProperty("--note-font-size", `${noteFontSize}px`);
+  }
 }
 
 function syncVisibleNotesForMode() {
@@ -753,6 +801,8 @@ function setupGlobalListeners() {
 
 function renderControls() {
   controlsNode.innerHTML = "";
+  const availableFretCounts = getAvailableFretCounts();
+  const renderedFretCount = getRenderableFretCount();
 
   const mobileTitle = document.createElement("section");
   mobileTitle.className = "mobile-hero-title";
@@ -821,14 +871,7 @@ function renderControls() {
       </div>
       <div class="field-row">
         <label for="fret-count">${escapeHtml(t("fretCountLabel"))}</label>
-        <select id="fret-count" name="fret-count">
-          <option value="12">12</option>
-          <option value="13">13</option>
-          <option value="15">15</option>
-          <option value="21">21</option>
-          <option value="22">22</option>
-          <option value="24">24</option>
-        </select>
+        <select id="fret-count" name="fret-count"></select>
       </div>
     </div>
   `;
@@ -1037,7 +1080,14 @@ function renderControls() {
   });
 
   const fretSelect = modeCard.querySelector("#fret-count");
-  fretSelect.value = String(state.fretCount);
+  availableFretCounts.forEach((count) => {
+    const option = document.createElement("option");
+    option.value = String(count);
+    option.textContent = String(count);
+    option.selected = count === renderedFretCount;
+    fretSelect.append(option);
+  });
+  fretSelect.value = String(renderedFretCount);
   fretSelect.addEventListener("change", (event) => {
     state.fretCount = Number(event.target.value);
     render();
@@ -1117,8 +1167,9 @@ function renderControls() {
 }
 
 function renderGuitar() {
+  const renderedFretCount = getRenderableFretCount();
   guitarNode.className = `guitar ${state.handedness === "left" ? "left-handed" : "right-handed"}`;
-  guitarNode.dataset.fretCount = String(state.fretCount);
+  guitarNode.dataset.fretCount = String(renderedFretCount);
   guitarNode.dataset.inlayStyle = state.inlayStyle;
   guitarNode.dataset.fretLayout = state.fretLayout;
   guitarNode.style.width = state.fretLayout === "real" ? `${(state.scaleLength / 25.5) * 100}%` : "100%";
@@ -1135,9 +1186,9 @@ function renderGuitar() {
 
   const frets = document.createElement("div");
   frets.className = "frets";
-  const fretMetrics = getFretSegmentPercentages(state.fretCount, state.scaleLength);
+  const fretMetrics = getFretSegmentPercentages(renderedFretCount, state.scaleLength);
 
-  const noteGrid = getFretboardNotes(state.tuningOctaves, state.fretCount, state.noteNaming);
+  const noteGrid = getFretboardNotes(state.tuningOctaves, renderedFretCount, state.noteNaming);
   const reversedTuningNotes = [...state.tuningNotes].reverse();
 
   reversedTuningNotes.forEach((noteName, index) => {
@@ -1153,7 +1204,7 @@ function renderGuitar() {
     nut.appendChild(string);
   });
 
-  for (let fretIndex = 1; fretIndex <= state.fretCount; fretIndex += 1) {
+  for (let fretIndex = 1; fretIndex <= renderedFretCount; fretIndex += 1) {
     const fret = document.createElement("div");
     fret.className = `fret fret-${fretIndex}`;
     fret.dataset.fret = String(fretIndex);
@@ -1207,23 +1258,7 @@ function renderGuitar() {
 
   fretboard.append(frets, strings);
   guitarNode.append(nut, fretboard);
-
-  const isMobileViewport = window.matchMedia("(max-width: 720px)").matches;
-
-  if (!isMobileViewport && state.fretLayout === "real" && state.fretCount >= 21) {
-    const fretNodes = frets.querySelectorAll(".fret");
-    const lastFret = fretNodes[fretNodes.length - 1];
-    if (lastFret) {
-      const lastFretWidth = lastFret.getBoundingClientRect().width;
-      const noteSize = Math.max(16, Math.floor(lastFretWidth));
-      const noteFontSize = Math.min(16, Math.max(10.5, noteSize * 0.42));
-      guitarNode.style.setProperty("--real-note-size", `${noteSize}px`);
-      guitarNode.style.setProperty("--real-note-font-size", `${noteFontSize}px`);
-    }
-  } else {
-    guitarNode.style.removeProperty("--real-note-size");
-    guitarNode.style.removeProperty("--real-note-font-size");
-  }
+  applyResponsiveNoteSizing(frets, renderedFretCount);
 }
 
 function render() {
@@ -1236,4 +1271,5 @@ function render() {
 
 loadState();
 setupGlobalListeners();
+window.addEventListener("resize", render);
 render();
