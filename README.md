@@ -14,11 +14,16 @@ It was built as a practical everyday tool for exploring alternate tunings, scale
 
 - alternate and open tunings
 - custom tuning input
+- saved tuning library
 - scale highlighting
+- interval display mode
+- capo control
 - sharp/flat note naming
 - right-handed and left-handed orientation
 - chart and real-scale fret spacing
 - dot and block inlays
+- URL state sharing
+- PNG export
 - mobile layout optimized for quick reference
 - multilingual UI
 
@@ -68,12 +73,12 @@ http://127.0.0.1:4173/index.html
 
 ### v1.1 - Usability & Core Workflow
 
-- [ ] Save custom tunings locally
-- [ ] Add capo control
-- [ ] Add interval mode
-- [ ] Highlight root notes separately
-- [ ] Preserve app state in URL
-- [ ] Export current fretboard as PNG
+- [x] Save custom tunings locally
+- [x] Add capo control
+- [x] Add interval mode
+- [x] Highlight root notes separately
+- [x] Preserve app state in URL
+- [x] Export current fretboard as PNG
 
 ### v1.2 - Music Workflow Features
 
