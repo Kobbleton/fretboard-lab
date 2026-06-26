@@ -10,6 +10,25 @@ const MOBILE_FRET_COUNTS = [12, 13];
 const DESKTOP_FRET_COUNTS = [12, 13, 15, 21, 22, 24];
 const SCALE_LENGTHS = [24.75, 25.5, 27];
 const CAPO_OPTIONS = Array.from({ length: 13 }, (_, index) => index);
+const CHORD_WINDOW_SPAN = 5;
+const CHORD_MAX_PLAYABLE_SPAN = 2;
+const CHORD_COMMON_LIMIT = 6;
+const CHORD_EXTENDED_LIMIT = 12;
+const CHORD_ALL_LIMIT = 48;
+const CHORD_REQUIRED_INTERVAL_OVERRIDES = {
+  dominant7: [0, 4, 10],
+  major7: [0, 4, 11],
+  minor7: [0, 3, 10],
+};
+const CHORD_FAMILY_SCORE = {
+  open: 28,
+  "barre-e": 12,
+  "barre-a": 12,
+  "caged-like": 10,
+  shell: 8,
+  "upper-triad": 6,
+  other: 0,
+};
 
 const NOTE_TO_SEMITONE = {
   C: 0,
@@ -149,6 +168,19 @@ const I18N = {
     sectionChord: "Chord",
     chordRootLabel: "Root",
     chordTypeLabel: "Chord type",
+    chordViewLabel: "View",
+    chordViewTones: "Tones",
+    chordViewShapes: "Shapes",
+    chordSetLabel: "Voicings",
+    chordSetCommon: "Common",
+    chordSetExtended: "Extended",
+    chordSetAll: "All playable",
+    chordShapePrev: "Prev",
+    chordShapeNext: "Next",
+    chordShapeNone: "No playable shapes were found in the current range.",
+    chordShapeCounter: ({ current, total }) => `Shape ${current} of ${total}`,
+    chordShapeDifficulty: ({ level }) => level,
+    chordShapeNotationLabel: "Voicing",
     capoBadge: ({ capo }) => `Capo ${capo}`,
     namingFlats: "\u266d Flats",
     namingSharps: "\u266f Sharps",
@@ -349,6 +381,8 @@ const state = {
   noteNaming: "sharps",
   noteDisplayMode: "notes",
   noteColorMode: "chromatic",
+  chordViewMode: "tones",
+  chordResultMode: "common",
   handedness: "right",
   inlayStyle: "dots",
   fretLayout: "chart",
@@ -360,6 +394,7 @@ const state = {
   selectedScaleType: "major",
   selectedChordRoot: "C",
   selectedChordType: "major",
+  selectedChordShapeIndex: 0,
   fretFocusMode: "off",
   fretFocusPosition: 1,
   fretRangeStart: 1,
@@ -378,6 +413,7 @@ const heroNode = document.querySelector(".hero");
 const controlsNode = document.getElementById("controls");
 const guitarNode = document.getElementById("guitar");
 const fretboardPageNode = document.getElementById("fretboard-page") || document.querySelector(".fretboard-page");
+const chordShapeCache = new Map();
 
 function t(key, params = {}) {
   const table = I18N[state.language] || I18N.en;
@@ -515,6 +551,8 @@ function resetAppView() {
   state.noteNaming = "sharps";
   state.noteDisplayMode = "notes";
   state.noteColorMode = "chromatic";
+  state.chordViewMode = "tones";
+  state.chordResultMode = "common";
   state.handedness = "right";
   state.inlayStyle = "dots";
   state.fretLayout = "chart";
@@ -526,6 +564,7 @@ function resetAppView() {
   state.selectedScaleType = "major";
   state.selectedChordRoot = "C";
   state.selectedChordType = "major";
+  state.selectedChordShapeIndex = 0;
   state.fretFocusMode = "off";
   state.fretFocusPosition = 1;
   state.fretRangeStart = 1;
@@ -613,9 +652,11 @@ function saveState() {
     tuningNotes: state.tuningNotes,
     tuningOctaves: state.tuningOctaves,
     visibleNotes: state.visibleNotes,
-    noteNaming: state.noteNaming,
-    noteDisplayMode: state.noteDisplayMode,
-    noteColorMode: state.noteColorMode,
+      noteNaming: state.noteNaming,
+      noteDisplayMode: state.noteDisplayMode,
+      noteColorMode: state.noteColorMode,
+      chordViewMode: state.chordViewMode,
+      chordResultMode: state.chordResultMode,
     handedness: state.handedness,
     inlayStyle: state.inlayStyle,
     fretLayout: state.fretLayout,
@@ -627,6 +668,7 @@ function saveState() {
     selectedScaleType: state.selectedScaleType,
     selectedChordRoot: state.selectedChordRoot,
     selectedChordType: state.selectedChordType,
+    selectedChordShapeIndex: state.selectedChordShapeIndex,
     fretFocusMode: state.fretFocusMode,
     fretFocusPosition: state.fretFocusPosition,
     fretRangeStart: state.fretRangeStart,
@@ -677,6 +719,12 @@ function applySnapshot(parsed) {
   if (typeof parsed.noteColorMode === "string" && ["chromatic", "degree"].includes(parsed.noteColorMode)) {
     state.noteColorMode = parsed.noteColorMode;
   }
+  if (typeof parsed.chordViewMode === "string" && ["tones", "shapes"].includes(parsed.chordViewMode)) {
+    state.chordViewMode = parsed.chordViewMode;
+  }
+  if (typeof parsed.chordResultMode === "string" && ["common", "extended", "all"].includes(parsed.chordResultMode)) {
+    state.chordResultMode = parsed.chordResultMode;
+  }
   if (typeof parsed.handedness === "string" && ["right", "left"].includes(parsed.handedness)) {
     state.handedness = parsed.handedness;
   }
@@ -709,6 +757,9 @@ function applySnapshot(parsed) {
   }
   if (typeof parsed.selectedChordRoot === "string") {
     state.selectedChordRoot = normalizeNoteName(parsed.selectedChordRoot, state.noteNaming);
+  }
+  if (typeof parsed.selectedChordShapeIndex === "number" && parsed.selectedChordShapeIndex >= 0) {
+    state.selectedChordShapeIndex = parsed.selectedChordShapeIndex;
   }
   if (typeof parsed.fretFocusMode === "string" && ["off", "position", "custom"].includes(parsed.fretFocusMode)) {
     state.fretFocusMode = parsed.fretFocusMode;
@@ -810,6 +861,10 @@ function getScaleNotes(root, scaleType, mode) {
   return pattern.intervals.map((interval) => getChromaticScale(mode)[(rootSemitone + interval) % 12]);
 }
 
+function getChordIntervals(chordType) {
+  return CHORD_PATTERNS[chordType]?.intervals || [];
+}
+
 function getChordLabel(chordType) {
   const chord = CHORD_PATTERNS[chordType];
   if (!chord) {
@@ -827,6 +882,20 @@ function getChordNotes(root, chordType, mode) {
   return pattern.intervals.map((interval) => getChromaticScale(mode)[(rootSemitone + interval) % 12]);
 }
 
+function getChordRequiredIntervals(chordType) {
+  return CHORD_REQUIRED_INTERVAL_OVERRIDES[chordType] || getChordIntervals(chordType);
+}
+
+function getChordIntervalValue(noteName, root, mode) {
+  const noteSemitone = NOTE_TO_SEMITONE[normalizeNoteName(noteName, mode)];
+  const rootSemitone = NOTE_TO_SEMITONE[normalizeNoteName(root, mode)];
+  return (noteSemitone - rootSemitone + 12) % 12;
+}
+
+function isChordShapeMode() {
+  return state.highlightMode === "chord" && state.chordViewMode === "shapes";
+}
+
 function getActiveRootNote() {
   return state.highlightMode === "chord" ? state.selectedChordRoot : state.selectedScaleRoot;
 }
@@ -842,6 +911,527 @@ function getCurrentNoteSet() {
     return getChromaticScale(state.noteNaming);
   }
   return state.visibleNotes.map((note) => normalizeNoteName(note, state.noteNaming));
+}
+
+function buildChordShapeCacheKey(root, chordType, fretCount) {
+  return [
+    state.tuningOctaves.join("|"),
+    state.noteNaming,
+    root,
+    chordType,
+    state.chordResultMode,
+    String(state.capo),
+    String(fretCount),
+    state.fretFocusMode,
+    String(state.fretRangeStart),
+    String(state.fretRangeEnd),
+  ].join("::");
+}
+
+function getChordSearchWindows(fretCount) {
+  if (state.fretFocusMode === "position" || state.fretFocusMode === "custom") {
+    return [{ start: state.fretRangeStart, end: state.fretRangeEnd }];
+  }
+
+  const firstWindowStart = Math.max(1, state.capo || 1);
+  const windows = [];
+  for (let start = firstWindowStart; start <= fretCount; start += 1) {
+    windows.push({ start, end: Math.min(start + CHORD_WINDOW_SPAN - 1, fretCount) });
+  }
+  return windows;
+}
+
+function getStringChordCandidates(openNoteWithOctave, stringIndex, chordNoteSet, root, mode, window) {
+  const candidates = [
+    {
+      stringIndex,
+      state: "mute",
+      relativeFret: null,
+      physicalFret: null,
+      noteName: null,
+      interval: null,
+    },
+  ];
+
+  const openNoteName = getOpenNoteWithCapo(openNoteWithOctave).replace(/\d+$/, "");
+  if (chordNoteSet.has(openNoteName)) {
+    candidates.push({
+      stringIndex,
+      state: "open",
+      relativeFret: 0,
+      physicalFret: state.capo || 0,
+      noteName: openNoteName,
+      interval: getChordIntervalValue(openNoteName, root, mode),
+    });
+  }
+
+  const openMidi = toMidiNumber(openNoteWithOctave);
+  const startPhysicalFret = Math.max(state.capo ? state.capo + 1 : 1, window.start);
+  for (let physicalFret = startPhysicalFret; physicalFret <= window.end; physicalFret += 1) {
+    const noteName = fromMidiNumber(openMidi + physicalFret, mode).replace(/\d+$/, "");
+    if (!chordNoteSet.has(noteName)) {
+      continue;
+    }
+    candidates.push({
+      stringIndex,
+      state: "fretted",
+      relativeFret: physicalFret - state.capo,
+      physicalFret,
+      noteName,
+      interval: getChordIntervalValue(noteName, root, mode),
+    });
+  }
+
+  return candidates;
+}
+
+function getMutedInnerStringCount(strings) {
+  const soundingIndexes = strings.filter((item) => item.state !== "mute").map((item) => item.stringIndex);
+  if (!soundingIndexes.length) {
+    return 0;
+  }
+  const minIndex = Math.min(...soundingIndexes);
+  const maxIndex = Math.max(...soundingIndexes);
+  let mutedInside = 0;
+  for (let index = minIndex; index <= maxIndex; index += 1) {
+    if (strings[index].state === "mute") {
+      mutedInside += 1;
+    }
+  }
+  return mutedInside;
+}
+
+function getShapeBarreFret(strings) {
+  const groups = new Map();
+  strings
+    .filter((item) => item.state === "fretted" && item.physicalFret !== null)
+    .forEach((item) => {
+      if (!groups.has(item.physicalFret)) {
+        groups.set(item.physicalFret, []);
+      }
+      groups.get(item.physicalFret).push(item.stringIndex);
+    });
+
+  let barreFret = null;
+  groups.forEach((stringIndexes, fret) => {
+    const sorted = [...stringIndexes].sort((a, b) => a - b);
+    let longestRun = 1;
+    let currentRun = 1;
+    for (let index = 1; index < sorted.length; index += 1) {
+      if (sorted[index] === sorted[index - 1] + 1) {
+        currentRun += 1;
+        longestRun = Math.max(longestRun, currentRun);
+      } else {
+        currentRun = 1;
+      }
+    }
+    if (longestRun >= 2 && (barreFret === null || fret < barreFret)) {
+      barreFret = fret;
+    }
+  });
+  return barreFret;
+}
+
+function hasUnplayableBarreConflict(strings, barreFret) {
+  if (barreFret === null) {
+    return false;
+  }
+
+  return strings.some((item) => item.state === "fretted" && item.physicalFret !== null && item.physicalFret < barreFret);
+}
+
+function getShapeJumpScore(strings) {
+  const relativeFrets = strings.filter((item) => item.state !== "mute").map((item) => item.relativeFret || 0);
+  if (relativeFrets.length < 2) {
+    return 0;
+  }
+  let totalJump = 0;
+  for (let index = 1; index < relativeFrets.length; index += 1) {
+    totalJump += Math.abs(relativeFrets[index] - relativeFrets[index - 1]);
+  }
+  return totalJump;
+}
+
+function getShapeLowestSoundingString(strings) {
+  return strings.find((item) => item.state !== "mute") || null;
+}
+
+function getShapeHasRootInBass(strings) {
+  return getShapeLowestSoundingString(strings)?.interval === 0;
+}
+
+function getUniquePitchClassCount(strings) {
+  return new Set(strings.filter((item) => item.state !== "mute").map((item) => item.noteName)).size;
+}
+
+function getRedundantDoublings(strings, requiredIntervals) {
+  const soundingCount = strings.filter((item) => item.state !== "mute").length;
+  const intervalSetCount = new Set(strings.filter((item) => item.state !== "mute").map((item) => item.interval)).size;
+  return Math.max(0, soundingCount - Math.max(requiredIntervals.length, intervalSetCount));
+}
+
+function getOpenRedundantDoublings(strings) {
+  const openSounding = strings.filter((item) => item.state === "open");
+  if (openSounding.length <= 1) {
+    return 0;
+  }
+  const uniqueOpenNotes = new Set(openSounding.map((item) => item.noteName)).size;
+  return Math.max(0, openSounding.length - uniqueOpenNotes);
+}
+
+function getVoicingClass(shape) {
+  if (shape.soundingCount <= 3) {
+    return "triad";
+  }
+  if (shape.soundingCount === 4 && shape.uniquePitchClassCount <= 4) {
+    return "shell";
+  }
+  return "full";
+}
+
+function getShapeFamilyTag(shape) {
+  const lowestString = getShapeLowestSoundingString(shape.strings);
+  if (shape.openCount >= 2 && shape.anchorFret <= 5) {
+    return "open";
+  }
+  if (shape.hasBarre && lowestString?.stringIndex === 0) {
+    return "barre-e";
+  }
+  if (shape.hasBarre && lowestString?.stringIndex === 1) {
+    return "barre-a";
+  }
+  if (shape.voicingClass === "shell") {
+    return "shell";
+  }
+  if (shape.voicingClass === "triad" && shape.anchorFret >= 5) {
+    return "upper-triad";
+  }
+  if (shape.anchorFret <= 7) {
+    return "caged-like";
+  }
+  return "other";
+}
+
+function getShapeGeometryKey(shape) {
+  const soundingStrings = shape.strings.filter((item) => item.state !== "mute");
+  const relativeFrets = soundingStrings.map((item) => item.relativeFret ?? 0).join("-");
+  const stringIndexes = soundingStrings.map((item) => item.stringIndex).join("-");
+  const intervals = [...shape.intervals].sort((a, b) => a - b).join("-");
+  const bassInterval = soundingStrings[0]?.interval ?? "x";
+  return `${stringIndexes}::${relativeFrets}::${intervals}::${bassInterval}`;
+}
+
+function getPlayabilityTier(shape) {
+  if (shape.fretSpan <= 2 && shape.jumpScore <= 6 && shape.mutedCount <= 1 && shape.innerMutedCount === 0) {
+    return "high";
+  }
+  if (shape.fretSpan <= 2 && shape.jumpScore <= 9 && shape.mutedCount <= 2) {
+    return "medium";
+  }
+  return "low";
+}
+
+function decorateChordShape(shape, requiredIntervals) {
+  shape.hasRootInBass = getShapeHasRootInBass(shape.strings);
+  shape.uniquePitchClassCount = getUniquePitchClassCount(shape.strings);
+  shape.redundantDoublings = getRedundantDoublings(shape.strings, requiredIntervals);
+  shape.openRedundantDoublings = getOpenRedundantDoublings(shape.strings);
+  shape.voicingClass = getVoicingClass(shape);
+  shape.familyTag = getShapeFamilyTag(shape);
+  shape.playabilityTier = getPlayabilityTier(shape);
+  shape.geometryKey = getShapeGeometryKey(shape);
+  return shape;
+}
+
+function scoreChordShape(shape, fretCenter) {
+  let score = 100;
+  if (shape.lowestInterval === 0) {
+    score += 22;
+  }
+  score += shape.requiredCoverage * 6;
+  score += shape.openCount * 7;
+  score += shape.soundingCount * 5;
+  score += Math.max(0, shape.soundingCount - 3) * 7;
+  score += shape.hasRootInBass ? 26 : -8;
+  score += CHORD_FAMILY_SCORE[shape.familyTag] || 0;
+  score += shape.playabilityTier === "high" ? 12 : shape.playabilityTier === "medium" ? 5 : 0;
+  score += shape.voicingClass === "full" ? 6 : shape.voicingClass === "shell" ? 3 : 0;
+  score += shape.uniquePitchClassCount >= 4 ? 5 : shape.uniquePitchClassCount === 3 ? 2 : 0;
+  score -= shape.mutedCount * 4;
+  score -= shape.innerMutedCount * 7;
+  score -= shape.jumpScore * 2.4;
+  score -= shape.redundantDoublings * 5;
+  score -= shape.openRedundantDoublings * 8;
+  score -= Math.max(0, shape.fretSpan - 3) * 8;
+  score -= shape.fingerEstimate * 3;
+  score -= shape.hasBarre ? 6 : 0;
+  score -= Math.max(0, shape.maxRelativeFret - 12) * 0.5;
+  if (shape.soundingCount < 4) {
+    score -= 18;
+  }
+  if (shape.mutedCount >= 3) {
+    score -= 12;
+  }
+  if (shape.familyTag === "other") {
+    score -= 10;
+  }
+  if (typeof fretCenter === "number" && shape.anchorFret > 0) {
+    score -= Math.abs(shape.anchorFret - fretCenter) * 0.45;
+  } else {
+    score -= shape.anchorFret * 4.6;
+    if (shape.anchorFret > 0 && shape.anchorFret <= 5) {
+      score += 14;
+    }
+    if (shape.anchorFret > 0 && shape.anchorFret <= 3) {
+      score += 8;
+    }
+  }
+  return score;
+}
+
+function buildChordShape(strings, root, chordType, mode, fretCenter) {
+  const soundingStrings = strings.filter((item) => item.state !== "mute");
+  if (soundingStrings.length < 3) {
+    return null;
+  }
+
+  const intervalSet = new Set(soundingStrings.map((item) => item.interval));
+  const requiredIntervals = getChordRequiredIntervals(chordType);
+  const requiredCoverage = requiredIntervals.filter((interval) => intervalSet.has(interval)).length;
+  if (requiredCoverage !== requiredIntervals.length) {
+    return null;
+  }
+
+  const physicalFrets = soundingStrings
+    .filter((item) => item.relativeFret > 0 && item.physicalFret !== null)
+    .map((item) => item.physicalFret);
+  const minPhysicalFret = physicalFrets.length ? Math.min(...physicalFrets) : 0;
+  const maxPhysicalFret = physicalFrets.length ? Math.max(...physicalFrets) : 0;
+  const fretSpan = physicalFrets.length ? maxPhysicalFret - minPhysicalFret : 0;
+  if (fretSpan > CHORD_MAX_PLAYABLE_SPAN) {
+    return null;
+  }
+
+  const barreFret = getShapeBarreFret(strings);
+  if (hasUnplayableBarreConflict(strings, barreFret)) {
+    return null;
+  }
+  const uniqueFretted = new Set(physicalFrets);
+  const fingerEstimate = uniqueFretted.size;
+  if (fingerEstimate > 4 && barreFret === null) {
+    return null;
+  }
+
+  const notation = strings
+    .map((item) => {
+      if (item.state === "mute") {
+        return "x";
+      }
+      return String(item.relativeFret);
+    })
+    .join(" ");
+
+  const openCount = strings.filter((item) => item.state === "open").length;
+  const mutedCount = strings.filter((item) => item.state === "mute").length;
+  const innerMutedCount = getMutedInnerStringCount(strings);
+  if (mutedCount > 3 || innerMutedCount > 1) {
+    return null;
+  }
+  const jumpScore = getShapeJumpScore(strings);
+  if (jumpScore > 12) {
+    return null;
+  }
+  const lowestInterval = soundingStrings[0]?.interval ?? null;
+  const anchorFret = minPhysicalFret || state.capo || 0;
+  const hasBarre = barreFret !== null;
+  const difficulty = hasBarre ? "Barre" : fretSpan >= 4 || fingerEstimate >= 4 ? "Stretch" : openCount >= 1 && fretSpan <= 3 ? "Easy" : "Medium";
+
+  const shape = {
+    id: `${notation}:${strings.map((item) => item.state[0]).join("")}`,
+    strings,
+    notation,
+    notes: soundingStrings.map((item) => item.noteName),
+    intervals: [...intervalSet].sort((a, b) => a - b),
+    soundingCount: soundingStrings.length,
+    mutedCount,
+    innerMutedCount,
+    jumpScore,
+    openCount,
+    fretSpan,
+    fingerEstimate,
+    lowestInterval,
+    anchorFret,
+    maxRelativeFret: Math.max(...soundingStrings.map((item) => item.relativeFret || 0)),
+    requiredCoverage,
+    hasBarre,
+    barreFret,
+    difficulty,
+    hasRootInBass: false,
+    uniquePitchClassCount: 0,
+    redundantDoublings: 0,
+    openRedundantDoublings: 0,
+    voicingClass: "full",
+    familyTag: "other",
+    playabilityTier: "low",
+    geometryKey: "",
+    score: 0,
+  };
+  decorateChordShape(shape, requiredIntervals);
+  shape.score = scoreChordShape(shape, fretCenter);
+  return shape;
+}
+
+function dedupeChordShapes(shapes) {
+  const byGeometry = new Map();
+  shapes.forEach((shape) => {
+    const existing = byGeometry.get(shape.geometryKey);
+    if (!existing || shape.score > existing.score) {
+      byGeometry.set(shape.geometryKey, shape);
+    }
+  });
+
+  const byVoicing = new Map();
+  [...byGeometry.values()].forEach((shape) => {
+    const key = `${shape.familyTag}::${shape.intervals.join("-")}::${shape.hasRootInBass ? "bass-root" : "no-bass-root"}::${shape.anchorFret}`;
+    const existing = byVoicing.get(key);
+    if (
+      !existing ||
+      shape.score > existing.score ||
+      (shape.score === existing.score && shape.redundantDoublings < existing.redundantDoublings)
+    ) {
+      byVoicing.set(key, shape);
+    }
+  });
+
+  return [...byVoicing.values()];
+}
+
+function getChordResultLimit(mode) {
+  if (mode === "common") {
+    return CHORD_COMMON_LIMIT;
+  }
+  if (mode === "extended") {
+    return CHORD_EXTENDED_LIMIT;
+  }
+  return CHORD_ALL_LIMIT;
+}
+
+function selectDiverseChordShapes(shapes, mode) {
+  if (mode === "all") {
+    return shapes.slice(0, CHORD_ALL_LIMIT);
+  }
+
+  const limit = getChordResultLimit(mode);
+  const familyLimit = mode === "common" ? 2 : 3;
+  const upperLimit = mode === "common" ? 2 : 3;
+  const selected = [];
+  const familyCounts = new Map();
+  let upperCount = 0;
+
+  for (const shape of shapes) {
+    if (selected.length >= limit) {
+      break;
+    }
+    const familyCount = familyCounts.get(shape.familyTag) || 0;
+    const isUpper = shape.anchorFret >= 7;
+    if (familyCount >= familyLimit) {
+      continue;
+    }
+    if (isUpper && upperCount >= upperLimit) {
+      continue;
+    }
+    selected.push(shape);
+    familyCounts.set(shape.familyTag, familyCount + 1);
+    if (isUpper) {
+      upperCount += 1;
+    }
+  }
+
+  if (selected.length < limit) {
+    for (const shape of shapes) {
+      if (selected.length >= limit) {
+        break;
+      }
+      if (selected.some((item) => item.id === shape.id)) {
+        continue;
+      }
+      selected.push(shape);
+    }
+  }
+
+  return selected;
+}
+
+function generateChordShapes(root, chordType, mode, fretCount) {
+  const cacheKey = buildChordShapeCacheKey(root, chordType, fretCount);
+  if (chordShapeCache.has(cacheKey)) {
+    return chordShapeCache.get(cacheKey);
+  }
+
+  const chordNoteSet = new Set(getChordNotes(root, chordType, mode));
+  const windows = getChordSearchWindows(fretCount);
+  const dedupedShapes = new Map();
+  const activeRangeCenter =
+    state.fretFocusMode === "off" ? null : state.fretRangeStart + (state.fretRangeEnd - state.fretRangeStart) / 2;
+
+  windows.forEach((window) => {
+    const candidatesByString = state.tuningOctaves.map((openNote, stringIndex) =>
+      getStringChordCandidates(openNote, stringIndex, chordNoteSet, root, mode, window)
+    );
+
+    const recurse = (stringIndex, currentStrings, currentFretted) => {
+      if (stringIndex === candidatesByString.length) {
+        const shape = buildChordShape(currentStrings, root, chordType, mode, activeRangeCenter);
+        if (!shape) {
+          return;
+        }
+        const existing = dedupedShapes.get(shape.notation);
+        if (!existing || shape.score > existing.score) {
+          dedupedShapes.set(shape.notation, shape);
+        }
+        return;
+      }
+
+      const remainingStrings = candidatesByString.length - stringIndex - 1;
+      const soundingCount = currentStrings.filter((item) => item.state !== "mute").length;
+      if (soundingCount + remainingStrings + 1 < 3) {
+        return;
+      }
+
+      candidatesByString[stringIndex].forEach((candidate) => {
+        const nextFretted = candidate.state === "fretted" ? [...currentFretted, candidate.physicalFret] : currentFretted;
+        if (nextFretted.length) {
+          const minFret = Math.min(...nextFretted);
+          const maxFret = Math.max(...nextFretted);
+          if (maxFret - minFret > CHORD_WINDOW_SPAN) {
+            return;
+          }
+        }
+        recurse(stringIndex + 1, [...currentStrings, candidate], nextFretted);
+      });
+    };
+
+    recurse(0, [], []);
+  });
+
+  const shapes = dedupeChordShapes([...dedupedShapes.values()]).sort((a, b) => b.score - a.score);
+  const limitedShapes = selectDiverseChordShapes(shapes, state.chordResultMode);
+  chordShapeCache.set(cacheKey, limitedShapes);
+  return limitedShapes;
+}
+
+function getChordShapes(root = state.selectedChordRoot, chordType = state.selectedChordType, mode = state.noteNaming, fretCount = getRenderableFretCount()) {
+  return generateChordShapes(root, chordType, mode, fretCount);
+}
+
+function getSelectedChordShape() {
+  const shapes = getChordShapes();
+  if (!shapes.length) {
+    state.selectedChordShapeIndex = 0;
+    return null;
+  }
+  state.selectedChordShapeIndex = Math.min(state.selectedChordShapeIndex, shapes.length - 1);
+  return shapes[state.selectedChordShapeIndex];
 }
 
 function getMaxRenderableFretCount() {
@@ -1000,6 +1590,10 @@ function getDisplayHtml(noteName) {
   return formatLabelWithAccidentals(noteName);
 }
 
+function getChordShapeStringMap(shape) {
+  return new Map((shape?.strings || []).map((item) => [item.stringIndex, item]));
+}
+
 function getFretboardNotes(tuningOctaves, fretCount, mode) {
   return tuningOctaves.map((openNote, stringIndex) => {
     const notes = [];
@@ -1022,7 +1616,7 @@ function getFretboardNotes(tuningOctaves, fretCount, mode) {
   });
 }
 
-function createButton({ label, className = "", isActive = false, isDimmed = false, onClick }) {
+function createButton({ label, className = "", isActive = false, isDimmed = false, isDisabled = false, onClick }) {
   const button = document.createElement("button");
   button.type = "button";
   button.textContent = label;
@@ -1032,6 +1626,9 @@ function createButton({ label, className = "", isActive = false, isDimmed = fals
   }
   if (isDimmed) {
     button.classList.add("is-dimmed");
+  }
+  if (isDisabled) {
+    button.disabled = true;
   }
   button.addEventListener("click", onClick);
   return button;
@@ -1236,6 +1833,14 @@ function renderControls() {
   chordCard.className = "control-card control-card--half control-card--chord";
   chordCard.innerHTML = `
     ${buildCardHeader(t("sectionChord"), t("sectionChordHelp"))}
+    <div class="field-row field-row--full">
+      <span>${escapeHtml(t("chordViewLabel"))}</span>
+      <div class="toggle-row" id="chord-view-row"></div>
+    </div>
+    <div class="field-row field-row--full" id="chord-set-field">
+      <span>${escapeHtml(t("chordSetLabel"))}</span>
+      <div class="toggle-row" id="chord-set-row"></div>
+    </div>
     <div class="scale-grid">
       <div class="field-row">
         <label for="chord-root">${escapeHtml(t("chordRootLabel"))}</label>
@@ -1246,6 +1851,7 @@ function renderControls() {
         <select id="chord-type" name="chord-type"></select>
       </div>
     </div>
+    <div class="chord-shape-toolbar" id="chord-shape-toolbar"></div>
     <p class="small-copy" id="chord-summary"></p>
   `;
 
@@ -1385,7 +1991,7 @@ function renderControls() {
 
   const rightColumn = document.createElement("div");
   rightColumn.className = "controls-column controls-column--right";
-  rightColumn.append(scaleCard, chordCard, modeCard, focusCard, displayCard);
+  rightColumn.append(chordCard, scaleCard, modeCard, focusCard, displayCard);
 
   controlsNode.append(mobileTitle, leftColumn, rightColumn, mobileLanguage);
 
@@ -1841,6 +2447,48 @@ function renderControls() {
   );
 
   const chordRoot = chordCard.querySelector("#chord-root");
+  const chordViewRow = chordCard.querySelector("#chord-view-row");
+  const chordSetRow = chordCard.querySelector("#chord-set-row");
+  [
+    { id: "tones", label: t("chordViewTones") },
+    { id: "shapes", label: t("chordViewShapes") },
+  ].forEach((mode) => {
+    chordViewRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.chordViewMode === mode.id,
+        onClick: () => {
+          state.chordViewMode = mode.id;
+          state.highlightMode = "chord";
+          state.selectedChordShapeIndex = 0;
+          syncVisibleNotesForMode();
+          render();
+        },
+      })
+    );
+  });
+  [
+    { id: "common", label: t("chordSetCommon") },
+    { id: "extended", label: t("chordSetExtended") },
+    { id: "all", label: t("chordSetAll") },
+  ].forEach((mode) => {
+    chordSetRow.append(
+      createButton({
+        label: mode.label,
+        className: "toggle-button",
+        isActive: state.chordResultMode === mode.id,
+        isDisabled: state.chordViewMode !== "shapes",
+        onClick: () => {
+          state.chordResultMode = mode.id;
+          state.highlightMode = "chord";
+          state.selectedChordShapeIndex = 0;
+          render();
+        },
+      })
+    );
+  });
+
   getChromaticScale(state.noteNaming).forEach((note) => {
     const option = document.createElement("option");
     option.value = note;
@@ -1850,9 +2498,9 @@ function renderControls() {
   });
   chordRoot.addEventListener("change", (event) => {
     state.selectedChordRoot = event.target.value;
-    if (state.highlightMode === "chord") {
-      syncVisibleNotesForMode();
-    }
+    state.highlightMode = "chord";
+    state.selectedChordShapeIndex = 0;
+    syncVisibleNotesForMode();
     render();
   });
 
@@ -1866,19 +2514,75 @@ function renderControls() {
   });
   chordType.addEventListener("change", (event) => {
     state.selectedChordType = event.target.value;
-    if (state.highlightMode === "chord") {
-      syncVisibleNotesForMode();
-    }
+    state.highlightMode = "chord";
+    state.selectedChordShapeIndex = 0;
+    syncVisibleNotesForMode();
     render();
   });
 
-  chordCard.querySelector("#chord-summary").innerHTML = escapeHtml(
-    t("chordSummary", {
-      root: state.selectedChordRoot,
-      label: getChordLabel(state.selectedChordType),
-      notes: getChordNotes(state.selectedChordRoot, state.selectedChordType, state.noteNaming).join(" "),
-    })
-  );
+  const chordShapes = getChordShapes(state.selectedChordRoot, state.selectedChordType, state.noteNaming, renderedFretCount);
+  const selectedChordShape = chordShapes.length ? getSelectedChordShape() : null;
+  const activeShapeIndex = chordShapes.length ? Math.min(state.selectedChordShapeIndex, chordShapes.length - 1) : 0;
+  const chordToolbar = chordCard.querySelector("#chord-shape-toolbar");
+  if (state.chordViewMode === "shapes") {
+    chordToolbar.classList.add("is-active");
+    chordToolbar.append(
+      createButton({
+        label: t("chordShapePrev"),
+        className: "toggle-button toggle-button--compact",
+        isDisabled: !chordShapes.length,
+        isDimmed: state.selectedChordShapeIndex === 0,
+        onClick: () => {
+          if (!chordShapes.length) {
+            return;
+          }
+          state.selectedChordShapeIndex = Math.max(0, state.selectedChordShapeIndex - 1);
+          render();
+        },
+      })
+    );
+
+    const shapeMeta = document.createElement("div");
+    shapeMeta.className = "chord-shape-meta";
+    if (selectedChordShape) {
+      const currentIndex = activeShapeIndex + 1;
+      shapeMeta.innerHTML = `
+        <span class="chord-shape-counter">${escapeHtml(t("chordShapeCounter", { current: currentIndex, total: chordShapes.length }))}</span>
+        <span class="chord-shape-notation">${escapeHtml(selectedChordShape.notation)}</span>
+        <span class="chord-shape-difficulty">${escapeHtml(t("chordShapeDifficulty", { level: selectedChordShape.difficulty }))}</span>
+      `;
+    } else {
+      shapeMeta.innerHTML = `<span class="chord-shape-empty">${escapeHtml(t("chordShapeNone"))}</span>`;
+    }
+    chordToolbar.append(shapeMeta);
+
+    chordToolbar.append(
+      createButton({
+        label: t("chordShapeNext"),
+        className: "toggle-button toggle-button--compact",
+        isDisabled: !chordShapes.length,
+        isDimmed: !chordShapes.length || activeShapeIndex >= chordShapes.length - 1,
+        onClick: () => {
+          if (!chordShapes.length) {
+            return;
+          }
+          state.selectedChordShapeIndex = Math.min(chordShapes.length - 1, state.selectedChordShapeIndex + 1);
+          render();
+        },
+      })
+    );
+  }
+
+  chordCard.querySelector("#chord-summary").innerHTML =
+    state.chordViewMode === "shapes"
+      ? escapeHtml(selectedChordShape ? `${state.selectedChordRoot} ${getChordLabel(state.selectedChordType)}: ${selectedChordShape.notes.join(" ")}` : t("chordShapeNone"))
+      : escapeHtml(
+          t("chordSummary", {
+            root: state.selectedChordRoot,
+            label: getChordLabel(state.selectedChordType),
+            notes: getChordNotes(state.selectedChordRoot, state.selectedChordType, state.noteNaming).join(" "),
+          })
+        );
 }
 
 function applyResponsiveNoteSizing(fretsNode, renderedFretCount) {
@@ -1919,6 +2623,8 @@ function renderGuitar() {
   const reversedOpenNotes = [...state.tuningOctaves]
     .reverse()
     .map((noteWithOctave) => getOpenNoteWithCapo(noteWithOctave).replace(/\d+$/, ""));
+  const selectedChordShape = isChordShapeMode() ? getSelectedChordShape() : null;
+  const selectedShapeMap = getChordShapeStringMap(selectedChordShape);
 
   guitarNode.className = `guitar ${state.handedness === "left" ? "left-handed" : "right-handed"}`;
   guitarNode.dataset.fretCount = String(renderedFretCount);
@@ -1951,13 +2657,20 @@ function renderGuitar() {
   reversedOpenNotes.forEach((noteName, index) => {
     const string = document.createElement("div");
     string.className = `open-string string-${index + 1}`;
+    const shapeString = selectedShapeMap.get(5 - index);
+    if (shapeString?.state === "mute") {
+      const muteMarker = document.createElement("div");
+      muteMarker.className = "string-mute-marker";
+      muteMarker.textContent = "X";
+      string.appendChild(muteMarker);
+    }
     if (state.capo === 0) {
-      const isVisible = isNoteVisible(noteName);
+      const isVisible = isChordShapeMode() ? shapeString?.state === "open" : isNoteVisible(noteName);
       const isRoot = shouldHighlightRoot(noteName);
       const hue = getNoteHue(noteName);
 
       const badge = document.createElement("div");
-      badge.className = `open-note${isVisible ? " is-open-active" : ""}${isRoot ? " is-open-root-note" : ""}`;
+      badge.className = `open-note${isVisible ? " is-open-active" : ""}${isChordShapeMode() && isVisible ? " is-chord-shape-note" : ""}${isRoot && isVisible ? " is-open-root-note" : ""}`;
       badge.dataset.note = noteName;
       badge.innerHTML = getDisplayHtml(noteName);
       if (typeof hue === "number") {
@@ -2010,8 +2723,15 @@ function renderGuitar() {
     for (let stringIndex = 5; stringIndex >= 0; stringIndex -= 1) {
       const note = noteGrid[stringIndex][fretIndex - 1];
       const isBlockedByCapo = state.capo > 0 && fretIndex < state.capo;
+      const shapeNote = selectedShapeMap.get(stringIndex);
+      const isShapeNote =
+        !!shapeNote &&
+        shapeNote.state !== "mute" &&
+        shapeNote.physicalFret === fretIndex &&
+        (shapeNote.state === "fretted" || (shapeNote.state === "open" && state.capo > 0));
+      const isVisible = isChordShapeMode() ? isShapeNote : note.isVisible && !isBlockedByCapo;
       const noteNode = document.createElement("div");
-      noteNode.className = `note${note.isVisible && !isBlockedByCapo ? "" : " is-hidden-note"}${note.isRoot ? " is-root-note" : ""}`;
+      noteNode.className = `note${isVisible ? "" : " is-hidden-note"}${note.isRoot && isVisible ? " is-root-note" : ""}${isShapeNote ? " is-chord-shape-note" : ""}`;
       noteNode.dataset.note = note.noteName;
       noteNode.dataset.noteWithOctave = note.noteWithOctave;
       noteNode.innerHTML = note.displayHtml;
@@ -2059,10 +2779,13 @@ function buildUrlState() {
   params.set("capo", String(state.capo));
   params.set("display", state.noteDisplayMode);
   params.set("color", state.noteColorMode);
+  params.set("chordView", state.chordViewMode);
+  params.set("chordSet", state.chordResultMode);
   params.set("root", state.selectedScaleRoot);
   params.set("scale", state.selectedScaleType);
   params.set("chordRoot", state.selectedChordRoot);
   params.set("chordType", state.selectedChordType);
+  params.set("shape", String(state.selectedChordShapeIndex));
   params.set("focus", state.fretFocusMode);
   params.set("position", String(state.fretFocusPosition));
   params.set("highlight", state.highlightMode);
@@ -2105,10 +2828,13 @@ function loadStateFromUrl() {
   if (params.has("capo")) snapshot.capo = Number(params.get("capo"));
   if (params.has("display")) snapshot.noteDisplayMode = params.get("display");
   if (params.has("color")) snapshot.noteColorMode = params.get("color");
+  if (params.has("chordView")) snapshot.chordViewMode = params.get("chordView");
+  if (params.has("chordSet")) snapshot.chordResultMode = params.get("chordSet");
   if (params.has("root")) snapshot.selectedScaleRoot = params.get("root");
   if (params.has("scale")) snapshot.selectedScaleType = params.get("scale");
   if (params.has("chordRoot")) snapshot.selectedChordRoot = params.get("chordRoot");
   if (params.has("chordType")) snapshot.selectedChordType = params.get("chordType");
+  if (params.has("shape")) snapshot.selectedChordShapeIndex = Number(params.get("shape"));
   if (params.has("focus")) snapshot.fretFocusMode = params.get("focus");
   if (params.has("position")) snapshot.fretFocusPosition = Number(params.get("position"));
   if (params.has("highlight")) snapshot.highlightMode = params.get("highlight");
