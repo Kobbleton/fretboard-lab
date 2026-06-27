@@ -104,7 +104,6 @@ const LANGUAGES = [
   { id: "en", label: "English" },
   { id: "uk", label: "\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430" },
   { id: "es", label: "Espa\u00f1ol" },
-  { id: "ru", label: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", square: true },
 ];
 
 const I18N = {
@@ -317,56 +316,6 @@ I18N.es = {
   scaleRootLabel: "T\u00f3nica",
   scaleTypeLabel: "Tipo de escala",
   customTuningDefault: "Afinaci\u00f3n personalizada",
-};
-
-I18N.ru = {
-  ...I18N.en,
-  documentTitle: "\u0413\u0440\u0438\u0444 \u0434\u043b\u044f \u043e\u0442\u043a\u0440\u044b\u0442\u044b\u0445 \u0441\u0442\u0440\u043e\u0435\u0432",
-  heroTitle: "\u0413\u0440\u0438\u0444 \u0434\u043b\u044f \u0441\u0432\u043e\u0438\u0445 \u0441\u0442\u0440\u043e\u0451\u0432",
-  sectionTunings: "\u0421\u0442\u0440\u043e\u0438",
-  tuningsHelp: "\u0412\u044b\u0431\u0435\u0440\u0438 \u0433\u043e\u0442\u043e\u0432\u044b\u0439 \u0441\u0442\u0440\u043e\u0439, \u0441\u043e\u0445\u0440\u0430\u043d\u044f\u0439 \u0441\u0432\u043e\u0438 \u0432\u0430\u0440\u0438\u0430\u043d\u0442\u044b \u0438\u043b\u0438 \u0432\u0432\u0435\u0434\u0438 \u0441\u0432\u043e\u0439 \u0448\u0435\u0441\u0442\u0438\u0441\u0442\u0440\u0443\u043d\u043d\u044b\u0439 \u0441\u0442\u0440\u043e\u0439 \u0432\u0440\u0443\u0447\u043d\u0443\u044e.",
-  customLabel: "\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u0441\u0442\u0440\u043e\u044f",
-  customNotes: "\u041d\u043e\u0442\u044b \u0441 \u043e\u043a\u0442\u0430\u0432\u0430\u043c\u0438",
-  applyCustom: "\u041f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c",
-  saveCustom: "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c",
-  savedTuningsLabel: "\u0421\u043e\u0445\u0440\u0430\u043d\u0451\u043d\u043d\u044b\u0435 \u0441\u0442\u0440\u043e\u0438",
-  noSavedTunings: "\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u0441\u043e\u0445\u0440\u0430\u043d\u0451\u043d\u043d\u044b\u0445 \u0441\u0442\u0440\u043e\u0435\u0432.",
-  deleteSaved: "\u0423\u0434\u0430\u043b\u0438\u0442\u044c",
-  hideAll: "\u0421\u043a\u0440\u044b\u0442\u044c \u0432\u0441\u0451",
-  showAll: "\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u0432\u0441\u0451",
-  sectionDisplay: "\u041e\u0442\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u0438\u0435",
-  sectionMode: "\u0420\u0435\u0436\u0438\u043c \u043f\u043e\u0434\u0441\u0432\u0435\u0442\u043a\u0438",
-  sectionNotes: "\u041f\u043e\u0434\u0441\u0432\u0435\u0442\u043a\u0430 \u043d\u043e\u0442",
-  sectionScale: "\u0413\u0430\u043c\u043c\u0430",
-  noteNamingLabel: "\u041f\u043e\u0434\u043f\u0438\u0441\u0438 \u043d\u043e\u0442",
-  noteDisplayLabel: "\u0420\u0435\u0436\u0438\u043c \u043f\u043e\u043a\u0430\u0437\u0430",
-  displayNotes: "\u041d\u043e\u0442\u044b",
-  displayIntervals: "\u0418\u043d\u0442\u0435\u0440\u0432\u0430\u043b\u044b",
-  handednessLabel: "\u041e\u0440\u0438\u0435\u043d\u0442\u0430\u0446\u0438\u044f",
-  inlayStyleLabel: "\u0418\u043d\u043b\u0435\u0438",
-  fretLayoutLabel: "\u0420\u0430\u0441\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u043b\u0430\u0434\u043e\u0432",
-  scaleLengthLabel: "\u041c\u0435\u043d\u0437\u0443\u0440\u0430",
-  fretCountLabel: "\u041b\u0430\u0434\u044b",
-  capoLabel: "Capo",
-  capoOff: "\u041a\u0430\u043f\u043e \u0432\u044b\u043a\u043b.",
-  exportPng: "\u042d\u043a\u0441\u043f\u043e\u0440\u0442 PNG",
-  namingFlats: "\u266d \u0411\u0435\u043c\u043e\u043b\u0438",
-  namingSharps: "\u266f \u0414\u0438\u0435\u0437\u044b",
-  highlightAll: "\u0412\u0441\u0435",
-  highlightCustom: "\u0412\u044b\u0431\u0440\u0430\u043d\u043d\u044b\u0435",
-  highlightScale: "\u0413\u0430\u043c\u043c\u0430",
-  handednessRight: "\u041f\u0440\u0430\u0432\u0448\u0430",
-  handednessLeft: "\u041b\u0435\u0432\u0448\u0430",
-  inlayDots: "\u0422\u043e\u0447\u043a\u0438",
-  inlayBlocks: "\u0411\u043b\u043e\u043a\u0438",
-  fretLayoutChart: "\u0421\u0435\u0442\u043a\u0430",
-  fretLayoutReal: "\u0420\u0435\u0430\u043b\u044c\u043d\u0430\u044f \u043c\u0435\u043d\u0437\u0443\u0440\u0430",
-  scaleLengthStandard: '25.5" \u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442',
-  scaleLengthGibson: '24.75" \u041a\u043e\u0440\u043e\u0442\u043a\u0430\u044f',
-  scaleLengthBaritone: '27" \u0411\u0430\u0440\u0438\u0442\u043e\u043d',
-  scaleRootLabel: "\u0422\u043e\u043d\u0438\u043a\u0430",
-  scaleTypeLabel: "\u0422\u0438\u043f \u0433\u0430\u043c\u043c\u044b",
-  customTuningDefault: "\u0421\u0432\u043e\u0439 \u0441\u0442\u0440\u043e\u0439",
 };
 
 const SINGLE_MARKER_FRETS = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
@@ -1650,7 +1599,7 @@ function buildLanguageSwitcher(extraClass = "") {
   trigger.setAttribute("aria-label", "Select language");
   trigger.innerHTML = `
     <span class="language-trigger-copy">
-      <span class="language-flag language-flag--${state.language}${state.language === "ru" ? " language-flag--square" : ""}"></span>
+      <span class="language-flag language-flag--${state.language}"></span>
       <span class="language-label">${escapeHtml(LANGUAGES.find((language) => language.id === state.language)?.label || "English")}</span>
     </span>
     <span class="language-caret" aria-hidden="true"></span>
@@ -1680,7 +1629,7 @@ function buildLanguageSwitcher(extraClass = "") {
     });
 
     const flag = document.createElement("span");
-    flag.className = `language-flag language-flag--${language.id}${language.square ? " language-flag--square" : ""}`;
+    flag.className = `language-flag language-flag--${language.id}`;
 
     const label = document.createElement("span");
     label.className = "language-label";

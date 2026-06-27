@@ -39,47 +39,47 @@ const PRESET_TUNINGS = [
 const SCALE_PATTERNS = {
   major: {
     intervals: [0, 2, 4, 5, 7, 9, 11],
-    labels: { en: "Major (Ionian)", uk: "Мажор (Іонійський)", es: "Mayor (Jónico)", ru: "Мажор (Ионийский)" },
+    labels: { en: "Major (Ionian)", uk: "Мажор (Іонійський)", es: "Mayor (Jónico)" },
   },
   minor: {
     intervals: [0, 2, 3, 5, 7, 8, 10],
-    labels: { en: "Minor (Aeolian)", uk: "Мінор (Еолійський)", es: "Menor (Eólico)", ru: "Минор (Эолийский)" },
+    labels: { en: "Minor (Aeolian)", uk: "Мінор (Еолійський)", es: "Menor (Eólico)" },
   },
   harmonicMinor: {
     intervals: [0, 2, 3, 5, 7, 8, 11],
-    labels: { en: "Harmonic Minor", uk: "Гармонічний мінор", es: "Menor armónica", ru: "Гармонический минор" },
+    labels: { en: "Harmonic Minor", uk: "Гармонічний мінор", es: "Menor armónica" },
   },
   melodicMinor: {
     intervals: [0, 2, 3, 5, 7, 9, 11],
-    labels: { en: "Melodic Minor", uk: "Мелодичний мінор", es: "Menor melódica", ru: "Мелодический минор" },
+    labels: { en: "Melodic Minor", uk: "Мелодичний мінор", es: "Menor melódica" },
   },
   dorian: {
     intervals: [0, 2, 3, 5, 7, 9, 10],
-    labels: { en: "Dorian", uk: "Дорійський", es: "Dórico", ru: "Дорийский" },
+    labels: { en: "Dorian", uk: "Дорійський", es: "Dórico" },
   },
   phrygian: {
     intervals: [0, 1, 3, 5, 7, 8, 10],
-    labels: { en: "Phrygian", uk: "Фригійський", es: "Frigio", ru: "Фригийский" },
+    labels: { en: "Phrygian", uk: "Фригійський", es: "Frigio" },
   },
   lydian: {
     intervals: [0, 2, 4, 6, 7, 9, 11],
-    labels: { en: "Lydian", uk: "Лідійський", es: "Lidio", ru: "Лидийский" },
+    labels: { en: "Lydian", uk: "Лідійський", es: "Lidio" },
   },
   mixolydian: {
     intervals: [0, 2, 4, 5, 7, 9, 10],
-    labels: { en: "Mixolydian", uk: "Міксолідійський", es: "Mixolidio", ru: "Миксолидийский" },
+    labels: { en: "Mixolydian", uk: "Міксолідійський", es: "Mixolidio" },
   },
   locrian: {
     intervals: [0, 1, 3, 5, 6, 8, 10],
-    labels: { en: "Locrian", uk: "Локрійський", es: "Locrio", ru: "Локрийский" },
+    labels: { en: "Locrian", uk: "Локрійський", es: "Locrio" },
   },
   majorPentatonic: {
     intervals: [0, 2, 4, 7, 9],
-    labels: { en: "Major Pentatonic", uk: "Мажорна пентатоніка", es: "Pentatónica mayor", ru: "Мажорная пентатоника" },
+    labels: { en: "Major Pentatonic", uk: "Мажорна пентатоніка", es: "Pentatónica mayor" },
   },
   minorPentatonic: {
     intervals: [0, 3, 5, 7, 10],
-    labels: { en: "Minor Pentatonic", uk: "Мінорна пентатоніка", es: "Pentatónica menor", ru: "Минорная пентатоника" },
+    labels: { en: "Minor Pentatonic", uk: "Мінорна пентатоніка", es: "Pentatónica menor" },
   },
 };
 
@@ -87,7 +87,6 @@ const LANGUAGES = [
   { id: "en", label: "English" },
   { id: "uk", label: "Українська" },
   { id: "es", label: "Español" },
-  { id: "ru", label: "Русский", square: true },
 ];
 
 const I18N = {
@@ -242,57 +241,6 @@ const I18N = {
     errorNeedSixNotes: "Introduce exactamente 6 notas con octavas, separadas por espacios.",
     errorInvalidNoteWithOctave: ({ value }) => `Nota con octava no válida: ${value}`,
     errorUnsupportedNote: ({ value }) => `Nombre de nota no compatible: ${value}`,
-    scaleSummary: ({ root, label, notes }) => `${root} ${label}: ${notes}`,
-  },
-  ru: {
-    documentTitle: "Гриф для открытых строев",
-    heroTitle: "Гриф для своих строёв",
-    fretboardAria: "Интерактивный гитарный гриф",
-    sectionTunings: "Строи",
-    tuningsHelp: "Выбери готовый строй или введи свой шестиструнный вариант.",
-    customLabel: "Название строя",
-    customLabelPlaceholder: "Например: FACGCE",
-    customNotes: "Ноты с октавами",
-    customNotesPlaceholder: "F2 A2 C3 G3 C4 E4",
-    applyCustom: "Применить свой строй",
-    hideAll: "Скрыть всё",
-    showAll: "Показать всё",
-    sectionDisplay: "Отображение",
-    noteNamingLabel: "Подписи нот",
-    highlightModeLabel: "Режим подсветки",
-    handednessLabel: "Ориентация",
-    inlayStyleLabel: "Инлеи",
-    fretLayoutLabel: "Расстояние ладов",
-    scaleLengthLabel: "Мензура",
-    fretCountLabel: "Лады",
-    namingFlats: "♭ Бемоли",
-    namingSharps: "♯ Диезы",
-    highlightAll: "Все",
-    highlightCustom: "Выбранные",
-    highlightScale: "Гамма",
-    handednessRight: "Правша",
-    handednessLeft: "Левша",
-    inlayDots: "Точки",
-    inlayBlocks: "Блоки",
-    fretLayoutChart: "Сетка",
-    fretLayoutReal: "Реальная мензура",
-    scaleLengthStandard: '25.5" Стандарт',
-    scaleLengthGibson: '24.75" Короткая',
-    scaleLengthBaritone: '27" Баритон',
-    sectionNotes: "Подсветка нот",
-    sectionScale: "Гамма",
-    scaleRootLabel: "Тоника",
-    scaleTypeLabel: "Тип гаммы",
-    customTuningDefault: "Свой строй",
-    msgPresetApplied: ({ preset }) => `Строй "${preset}" активирован.`,
-    msgCustomApplied: ({ label }) => `Строй "${label}" применён.`,
-    msgAllHidden: "Все ноты скрыты. Включи только нужные.",
-    msgAllShown: "Все ноты снова видны.",
-    msgSharps: "Подписи нот переключены на диезы.",
-    msgFlats: "Подписи нот переключены на бемоли.",
-    errorNeedSixNotes: "Нужно ввести ровно 6 нот с октавами через пробел.",
-    errorInvalidNoteWithOctave: ({ value }) => `Некорректная нота с октавой: ${value}`,
-    errorUnsupportedNote: ({ value }) => `Неподдерживаемое название ноты: ${value}`,
     scaleSummary: ({ root, label, notes }) => `${root} ${label}: ${notes}`,
   },
 };
@@ -707,7 +655,7 @@ function buildLanguageSwitcher(extraClass = "") {
   trigger.setAttribute("aria-label", "Select language");
   trigger.innerHTML = `
     <span class="language-trigger-copy">
-      <span class="language-flag language-flag--${state.language}${state.language === "ru" ? " language-flag--square" : ""}"></span>
+      <span class="language-flag language-flag--${state.language}"></span>
       <span class="language-label">${escapeHtml(LANGUAGES.find((language) => language.id === state.language)?.label || "English")}</span>
     </span>
     <span class="language-caret" aria-hidden="true"></span>
@@ -737,7 +685,7 @@ function buildLanguageSwitcher(extraClass = "") {
     });
 
     const flag = document.createElement("span");
-    flag.className = `language-flag language-flag--${language.id}${language.square ? " language-flag--square" : ""}`;
+    flag.className = `language-flag language-flag--${language.id}`;
 
     const label = document.createElement("span");
     label.className = "language-label";
