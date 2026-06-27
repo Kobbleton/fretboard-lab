@@ -164,6 +164,7 @@ const I18N = {
     fretFocusSummaryPosition: ({ start, end }) => `Position focus shows frets ${start}-${end}.`,
     fretFocusSummaryCustom: ({ start, end }) => `Custom focus shows frets ${start}-${end}.`,
     capoLabel: "Capo",
+    capoOff: "Capo Off",
     exportPng: "Export PNG",
     sectionChord: "Chord",
     chordRootLabel: "Root",
@@ -247,6 +248,7 @@ I18N.uk = {
   scaleLengthLabel: "\u041c\u0435\u043d\u0437\u0443\u0440\u0430",
   fretCountLabel: "\u041b\u0430\u0434\u0438",
   capoLabel: "Capo",
+  capoOff: "\u041a\u0430\u043f\u043e \u0432\u0438\u043c\u043a.",
   exportPng: "Export PNG",
   namingFlats: "\u266d \u0411\u0435\u043c\u043e\u043b\u0456",
   namingSharps: "\u266f \u0414\u0456\u0454\u0437\u0438",
@@ -296,6 +298,7 @@ I18N.es = {
   scaleLengthLabel: "Escala",
   fretCountLabel: "Trastes",
   capoLabel: "Capo",
+  capoOff: "Sin capo",
   exportPng: "Exportar PNG",
   namingFlats: "\u266d Bemoles",
   namingSharps: "\u266f Sostenidos",
@@ -345,6 +348,7 @@ I18N.ru = {
   scaleLengthLabel: "\u041c\u0435\u043d\u0437\u0443\u0440\u0430",
   fretCountLabel: "\u041b\u0430\u0434\u044b",
   capoLabel: "Capo",
+  capoOff: "\u041a\u0430\u043f\u043e \u0432\u044b\u043a\u043b.",
   exportPng: "\u042d\u043a\u0441\u043f\u043e\u0440\u0442 PNG",
   namingFlats: "\u266d \u0411\u0435\u043c\u043e\u043b\u0438",
   namingSharps: "\u266f \u0414\u0438\u0435\u0437\u044b",
@@ -1809,14 +1813,16 @@ function renderControls() {
   noteCard.className = "control-card control-card--wide control-card--note";
   noteCard.innerHTML = `
     ${buildCardHeader(t("sectionNotes"), t("sectionNotesHelp"))}
-    <div class="chip-row" id="note-chip-row"></div>
+    <div class="control-group control-group--primary">
+      <div class="chip-row chip-row--notes" id="note-chip-row"></div>
+    </div>
   `;
 
   const scaleCard = document.createElement("section");
   scaleCard.className = "control-card control-card--half control-card--scale";
   scaleCard.innerHTML = `
     ${buildCardHeader(t("sectionScale"), t("sectionScaleHelp"))}
-    <div class="scale-grid">
+    <div class="scale-grid control-group control-group--primary">
       <div class="field-row">
         <label for="scale-root">${escapeHtml(t("scaleRootLabel"))}</label>
         <select id="scale-root" name="scale-root"></select>
@@ -1833,26 +1839,34 @@ function renderControls() {
   chordCard.className = "control-card control-card--half control-card--chord";
   chordCard.innerHTML = `
     ${buildCardHeader(t("sectionChord"), t("sectionChordHelp"))}
-    <div class="field-row field-row--full">
-      <span>${escapeHtml(t("chordViewLabel"))}</span>
-      <div class="toggle-row" id="chord-view-row"></div>
-    </div>
-    <div class="field-row field-row--full" id="chord-set-field">
-      <span>${escapeHtml(t("chordSetLabel"))}</span>
-      <div class="toggle-row" id="chord-set-row"></div>
-    </div>
-    <div class="scale-grid">
-      <div class="field-row">
-        <label for="chord-root">${escapeHtml(t("chordRootLabel"))}</label>
-        <select id="chord-root" name="chord-root"></select>
+    <div class="chord-workflow-grid">
+      <div class="scale-grid control-group control-group--primary chord-picker-stack">
+        <div class="field-row chord-root-field">
+          <label for="chord-root">${escapeHtml(t("chordRootLabel"))}</label>
+          <select id="chord-root" name="chord-root"></select>
+        </div>
+        <div class="field-row chord-type-field">
+          <label for="chord-type">${escapeHtml(t("chordTypeLabel"))}</label>
+          <select id="chord-type" name="chord-type"></select>
+        </div>
+        <div class="field-row field-row--full chord-view-field">
+          <span>${escapeHtml(t("chordViewLabel"))}</span>
+          <div class="toggle-row" id="chord-view-row"></div>
+        </div>
       </div>
-      <div class="field-row">
-        <label for="chord-type">${escapeHtml(t("chordTypeLabel"))}</label>
-        <select id="chord-type" name="chord-type"></select>
+      <div class="chord-result-column">
+        <div class="control-group control-group--toolbar chord-shape-group">
+          <div class="chord-shape-toolbar" id="chord-shape-toolbar"></div>
+        </div>
+        <p class="small-copy chord-summary-card" id="chord-summary"></p>
+        <div class="control-group control-group--secondary chord-voicing-group">
+          <div class="field-row field-row--full" id="chord-set-field">
+            <span>${escapeHtml(t("chordSetLabel"))}</span>
+            <div class="toggle-row toggle-row--quiet" id="chord-set-row"></div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="chord-shape-toolbar" id="chord-shape-toolbar"></div>
-    <p class="small-copy" id="chord-summary"></p>
   `;
 
   const modeCard = document.createElement("section");
@@ -1860,16 +1874,16 @@ function renderControls() {
   modeCard.innerHTML = `
     ${buildCardHeader(t("sectionMode"), t("sectionModeHelp"))}
     <div class="card-stack">
-      <div class="field-row field-row--full">
+      <div class="field-row field-row--full control-group control-group--primary">
         <div class="toggle-row" id="highlight-mode-row"></div>
       </div>
-      <div class="field-row field-row--full field-row--actions">
+      <div class="field-row field-row--full field-row--actions control-group control-group--utility">
         <div class="toggle-row" id="mode-actions-row"></div>
       </div>
-      <div class="display-grid display-grid--compact">
+      <div class="display-grid display-grid--compact control-group control-group--secondary">
         <div class="field-row">
           <span>${escapeHtml(t("inlayStyleLabel"))}</span>
-          <div class="toggle-row" id="inlay-style-row"></div>
+          <div class="toggle-row toggle-row--quiet" id="inlay-style-row"></div>
         </div>
         <div class="field-row">
           <label for="fret-count">${escapeHtml(t("fretCountLabel"))}</label>
@@ -1884,11 +1898,11 @@ function renderControls() {
   focusCard.innerHTML = `
     ${buildCardHeader(t("fretRangeLabel"), t("sectionFocusHelp"))}
     <div class="card-stack">
-      <div class="field-row field-row--full">
+      <div class="field-row field-row--full control-group control-group--primary">
         <div class="toggle-row" id="focus-mode-row"></div>
       </div>
       <p class="small-copy small-copy--tight" id="focus-summary">${escapeHtml(getFretFocusSummary())}</p>
-      <div class="display-grid display-grid--compact">
+      <div class="display-grid display-grid--compact control-group control-group--secondary">
         <div class="field-row">
           <label for="fret-focus-position">${escapeHtml(t("fretFocusPositionLabel"))}</label>
           <select id="fret-focus-position" name="fret-focus-position"></select>
@@ -1902,7 +1916,7 @@ function renderControls() {
           <select id="fret-range-end" name="fret-range-end"></select>
         </div>
       </div>
-      <div class="field-row field-row--full field-row--actions">
+      <div class="field-row field-row--full field-row--actions control-group control-group--utility">
         <div class="toggle-row" id="focus-actions-row"></div>
       </div>
     </div>
@@ -1913,7 +1927,7 @@ function renderControls() {
   displayCard.innerHTML = `
     ${buildCardHeader(t("sectionDisplay"), t("sectionDisplayHelp"))}
     <div class="card-stack">
-      <div class="display-grid display-grid--compact">
+      <div class="display-grid display-grid--compact control-group control-group--primary">
         <div class="field-row">
           <span>${escapeHtml(t("noteNamingLabel"))}</span>
           <div class="toggle-row" id="note-naming-row"></div>
@@ -1926,16 +1940,16 @@ function renderControls() {
           <span>${escapeHtml(t("noteColorLabel"))}</span>
           <div class="toggle-row" id="note-color-row"></div>
         </div>
+      </div>
+      <div class="display-grid display-grid--compact control-group control-group--secondary">
         <div class="field-row">
           <span>${escapeHtml(t("handednessLabel"))}</span>
-          <div class="toggle-row" id="handedness-row"></div>
+          <div class="toggle-row toggle-row--quiet" id="handedness-row"></div>
         </div>
         <div class="field-row">
           <span>${escapeHtml(t("fretLayoutLabel"))}</span>
           <div class="toggle-row" id="fret-layout-row"></div>
         </div>
-      </div>
-      <div class="display-grid display-grid--compact display-grid--settings">
         <div class="field-row">
           <label for="scale-length">${escapeHtml(t("scaleLengthLabel"))}</label>
           <select id="scale-length" name="scale-length">
@@ -1947,10 +1961,10 @@ function renderControls() {
         <div class="field-row">
           <label for="capo">${escapeHtml(t("capoLabel"))}</label>
           <select id="capo" name="capo"></select>
-          <div class="toggle-row" id="capo-actions-row"></div>
+          <div class="toggle-row toggle-row--quiet" id="capo-actions-row"></div>
         </div>
       </div>
-      <div class="field-row field-row--full field-row--actions">
+      <div class="field-row field-row--full field-row--actions control-group control-group--utility">
         <div class="toggle-row control-actions-row" id="display-actions-row"></div>
       </div>
     </div>
@@ -1960,24 +1974,28 @@ function renderControls() {
   tuningCard.className = "control-card control-card--wide control-card--tuning";
   tuningCard.innerHTML = `
     ${buildCardHeader(t("sectionTunings"), t("sectionTuningsHelp"))}
-    ${buildSectionLabel(t("presetsLabel"))}
-    <div class="presets-row" id="preset-tunings"></div>
-    <div class="saved-tunings-section">
+    <div class="control-group control-group--primary">
+      ${buildSectionLabel(t("presetsLabel"))}
+      <div class="presets-row" id="preset-tunings"></div>
+    </div>
+    <div class="control-group control-group--secondary saved-tunings-section">
       <div class="saved-tunings-header">${escapeHtml(t("savedTuningsLabel"))}</div>
       <div class="saved-tunings-list" id="saved-tunings-list">${buildSavedTuningsMarkup()}</div>
     </div>
-    ${buildSectionLabel(t("customTuningSection"))}
-    <div class="custom-grid">
-      <div class="field-row">
-        <label for="custom-label">${escapeHtml(t("customLabel"))}</label>
-        <input id="custom-label" name="custom-label" placeholder="${escapeHtml(t("customLabelPlaceholder"))}" value="${escapeHtml(state.tuningDraftLabel)}" />
+    <div class="control-group control-group--secondary">
+      ${buildSectionLabel(t("customTuningSection"))}
+      <div class="custom-grid">
+        <div class="field-row">
+          <label for="custom-label">${escapeHtml(t("customLabel"))}</label>
+          <input id="custom-label" name="custom-label" placeholder="${escapeHtml(t("customLabelPlaceholder"))}" value="${escapeHtml(state.tuningDraftLabel)}" />
+        </div>
+        <div class="field-row">
+          <label for="custom-notes">${escapeHtml(t("customNotes"))}</label>
+          <input id="custom-notes" name="custom-notes" placeholder="${escapeHtml(t("customNotesPlaceholder"))}" value="${escapeHtml(state.tuningDraftNotesText)}" />
+        </div>
       </div>
-      <div class="field-row">
-        <label for="custom-notes">${escapeHtml(t("customNotes"))}</label>
-        <input id="custom-notes" name="custom-notes" placeholder="${escapeHtml(t("customNotesPlaceholder"))}" value="${escapeHtml(state.tuningDraftNotesText)}" />
-      </div>
+      <div class="toggle-row toggle-row--quiet" id="custom-actions"></div>
     </div>
-    <div class="toggle-row" id="custom-actions"></div>
     <p class="message ${state.inlineMessageType}" id="message-area">${escapeHtml(state.inlineMessageText)}</p>
   `;
 
@@ -1987,11 +2005,11 @@ function renderControls() {
 
   const leftColumn = document.createElement("div");
   leftColumn.className = "controls-column controls-column--left";
-  leftColumn.append(noteCard, tuningCard);
+  leftColumn.append(chordCard, scaleCard, tuningCard, noteCard);
 
   const rightColumn = document.createElement("div");
   rightColumn.className = "controls-column controls-column--right";
-  rightColumn.append(chordCard, scaleCard, modeCard, focusCard, displayCard);
+  rightColumn.append(modeCard, focusCard, displayCard);
 
   controlsNode.append(mobileTitle, leftColumn, rightColumn, mobileLanguage);
 
@@ -2048,7 +2066,7 @@ function renderControls() {
   customActions.append(
     createButton({
       label: t("applyCustom"),
-      className: "toggle-button",
+      className: "toggle-button toggle-button--primary",
       onClick: () => {
         try {
           setDraftFromInputs();
@@ -2069,7 +2087,7 @@ function renderControls() {
     }),
     createButton({
       label: t("saveCustom"),
-      className: "toggle-button",
+      className: "toggle-button toggle-button--quiet",
       onClick: () => {
         try {
           setDraftFromInputs();
@@ -2104,7 +2122,7 @@ function renderControls() {
     noteNamingRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--primary",
         isActive: state.noteNaming === mode.id,
         onClick: () => {
           updateNoteNaming(mode.id);
@@ -2123,7 +2141,7 @@ function renderControls() {
     noteDisplayRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--primary",
         isActive: state.noteDisplayMode === mode.id,
         onClick: () => {
           state.noteDisplayMode = mode.id;
@@ -2141,7 +2159,7 @@ function renderControls() {
     noteColorRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--primary",
         isActive: state.noteColorMode === mode.id,
         onClick: () => {
           state.noteColorMode = mode.id;
@@ -2161,7 +2179,7 @@ function renderControls() {
     highlightModeRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--primary",
         isActive: state.highlightMode === mode.id,
         onClick: () => {
           state.highlightMode = mode.id;
@@ -2175,7 +2193,7 @@ function renderControls() {
   modeCard.querySelector("#mode-actions-row").append(
     createButton({
       label: t("hideAll"),
-      className: "toggle-button",
+      className: "toggle-button toggle-button--quiet",
       onClick: () => {
         state.highlightMode = "custom";
         state.visibleNotes = [];
@@ -2185,7 +2203,7 @@ function renderControls() {
     }),
     createButton({
       label: t("showAll"),
-      className: "toggle-button",
+      className: "toggle-button toggle-button--quiet",
       onClick: () => {
         state.highlightMode = "all";
         syncVisibleNotesForMode();
@@ -2203,7 +2221,7 @@ function renderControls() {
     handednessRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--quiet",
         isActive: state.handedness === mode.id,
         onClick: () => {
           state.handedness = mode.id;
@@ -2221,7 +2239,7 @@ function renderControls() {
     inlayStyleRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--quiet",
         isActive: state.inlayStyle === mode.id,
         onClick: () => {
           state.inlayStyle = mode.id;
@@ -2239,7 +2257,7 @@ function renderControls() {
     fretLayoutRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--primary",
         isActive: state.fretLayout === mode.id,
         onClick: () => {
           state.fretLayout = mode.id;
@@ -2252,7 +2270,7 @@ function renderControls() {
   displayCard.querySelector("#display-actions-row").append(
     createButton({
       label: t("exportPng"),
-      className: "toggle-button",
+      className: "toggle-button toggle-button--quiet",
       onClick: () => {
         exportFretboardPng();
       },
@@ -2283,7 +2301,7 @@ function renderControls() {
     focusModeRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--primary",
         isActive: state.fretFocusMode === mode.id,
         onClick: () => {
           state.fretFocusMode = mode.id;
@@ -2343,7 +2361,7 @@ function renderControls() {
   focusCard.querySelector("#focus-actions-row").append(
     createButton({
       label: t("fretFocusReset"),
-      className: "toggle-button",
+      className: "toggle-button toggle-button--quiet",
       isDimmed: state.fretFocusMode === "off",
       onClick: () => {
         resetFretFocus();
@@ -2375,8 +2393,8 @@ function renderControls() {
 
   displayCard.querySelector("#capo-actions-row").append(
     createButton({
-      label: "Capo Off",
-      className: "toggle-button",
+      label: t("capoOff"),
+      className: "toggle-button toggle-button--quiet",
       isDimmed: state.capo === 0,
       onClick: () => {
         state.capo = 0;
@@ -2456,7 +2474,7 @@ function renderControls() {
     chordViewRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--primary",
         isActive: state.chordViewMode === mode.id,
         onClick: () => {
           state.chordViewMode = mode.id;
@@ -2476,7 +2494,7 @@ function renderControls() {
     chordSetRow.append(
       createButton({
         label: mode.label,
-        className: "toggle-button",
+        className: "toggle-button toggle-button--quiet",
         isActive: state.chordResultMode === mode.id,
         isDisabled: state.chordViewMode !== "shapes",
         onClick: () => {
@@ -2529,7 +2547,7 @@ function renderControls() {
     chordToolbar.append(
       createButton({
         label: t("chordShapePrev"),
-        className: "toggle-button toggle-button--compact",
+        className: "toggle-button toggle-button--compact toggle-button--quiet",
         isDisabled: !chordShapes.length,
         isDimmed: state.selectedChordShapeIndex === 0,
         onClick: () => {
@@ -2559,7 +2577,7 @@ function renderControls() {
     chordToolbar.append(
       createButton({
         label: t("chordShapeNext"),
-        className: "toggle-button toggle-button--compact",
+        className: "toggle-button toggle-button--compact toggle-button--primary",
         isDisabled: !chordShapes.length,
         isDimmed: !chordShapes.length || activeShapeIndex >= chordShapes.length - 1,
         onClick: () => {
