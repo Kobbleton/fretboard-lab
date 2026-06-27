@@ -1379,30 +1379,31 @@ select {
 
 @media (max-width: 720px) {
   .page-shell {
-    padding: 22px 4vw 32px;
+    padding: 0 0 32px;
   }
 
-  .hero-topbar {
-    align-items: center;
+  .hero {
     margin-bottom: 0;
   }
 
+  .hero-topbar,
   .hero h1,
   .language-switcher--desktop {
     display: none;
   }
 
   .fretboard-page {
-    gap: 18px;
+    gap: 20px;
   }
 
   .guitar-wrap {
     order: -1;
     position: relative;
-    width: calc(100% + 4vw);
-    min-height: calc(100svh - 96px);
-    margin-inline: -2vw;
-    padding: 0;
+    width: 100%;
+    min-height: 100svh;
+    margin-inline: 0;
+    padding: max(env(safe-area-inset-top, 0px), 2svh) 0 max(env(safe-area-inset-bottom, 0px), 2svh);
+    box-sizing: border-box;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -1410,12 +1411,12 @@ select {
   }
 
   .guitar {
-    width: calc(100svh - 136px);
-    min-width: calc(100svh - 136px);
+    width: calc(100svh - 56px);
+    min-width: calc(100svh - 56px);
     max-width: none;
-    height: min(84vw, 352px);
+    height: min(88vw, 380px);
     margin: 0;
-    transform: translateX(calc(((100svh - 136px) - min(84vw, 352px)) / 2)) rotate(90deg);
+    transform: translateX(calc(((100svh - 56px) - min(88vw, 380px)) / 2)) rotate(90deg);
     transform-origin: center;
   }
 
@@ -1423,6 +1424,7 @@ select {
     grid-template-columns: 1fr;
     grid-template-areas: none;
     gap: 16px;
+    padding: 0 4vw;
     align-items: start;
   }
 
@@ -1558,12 +1560,18 @@ select {
 
   .mobile-hero-title {
     order: -1;
+    display: grid;
+    gap: 10px;
   }
 
   .mobile-hero-title h1 {
     margin: 0;
     font-size: clamp(1.9rem, 9vw, 3rem);
     line-height: 0.98;
+  }
+
+  .mobile-hero-title .eyebrow-button {
+    justify-self: start;
   }
 
   .mobile-language-footer {

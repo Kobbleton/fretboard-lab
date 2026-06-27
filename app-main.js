@@ -1756,7 +1756,10 @@ function renderControls() {
 
   const mobileTitle = document.createElement("section");
   mobileTitle.className = "mobile-hero-title";
-  mobileTitle.innerHTML = `<h1>${escapeHtml(t("heroTitle"))}</h1>`;
+  mobileTitle.innerHTML = `
+    <button type="button" class="eyebrow-button" id="mobile-home-button">${escapeHtml(t("homeButton"))}</button>
+    <h1>${escapeHtml(t("heroTitle"))}</h1>
+  `;
 
   const noteCard = document.createElement("section");
   noteCard.className = "control-card control-card--wide control-card--note";
@@ -1961,6 +1964,11 @@ function renderControls() {
   rightColumn.append(modeCard, focusCard, displayCard);
 
   controlsNode.append(mobileTitle, leftColumn, rightColumn, mobileLanguage);
+
+  mobileTitle.querySelector("#mobile-home-button")?.addEventListener("click", () => {
+    resetAppView();
+    render();
+  });
 
   const presetRow = tuningCard.querySelector("#preset-tunings");
   PRESET_TUNINGS.forEach((preset) => {
