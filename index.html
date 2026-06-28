@@ -2,16 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Open Tunings Fretboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#041f28" />
+    <title>freternity</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=20260626-6" />
-    <link rel="stylesheet" href="./styles.css?v=20260626-6" />
+    <link rel="stylesheet" href="./styles.css?v=20260628-2" />
   </head>
   <body>
     <main class="page-shell">
       <section class="hero">
-        <p class="eyebrow">Open Tunings Charts</p>
-        <h1>Explore your tuning on the neck</h1>
+        <p class="eyebrow">freternity</p>
+        <h1>Tunings, chords, scales. One neck.</h1>
         <p class="hero-copy">
           Static fretboard tool without canvas: the neck is built with regular layout, and note positions are
           calculated in the browser from the tuning and chromatic sequence.
@@ -20,10 +21,11 @@
       <section class="fretboard-page" aria-label="Interactive guitar fretboard">
         <div class="controls" id="controls"></div>
         <div class="guitar-wrap">
+          <button type="button" class="mobile-rotate-button" id="mobile-rotate-button" aria-label="Rotate labels"></button>
           <div class="guitar right-handed" id="guitar"></div>
         </div>
       </section>
     </main>
-    <script src="./app-main.js?v=20260626-8"></script>
+    <script src="./app-main.js?v=20260628-2"></script>
   </body>
 </html>

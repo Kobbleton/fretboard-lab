@@ -108,10 +108,10 @@ const LANGUAGES = [
 
 const I18N = {
   en: {
-    documentTitle: "Open Tunings Fretboard",
-    heroTitle: "Explore your tuning on the neck",
+    documentTitle: "freternity",
+    heroTitle: "Tunings, chords, scales. One neck.",
     fretboardAria: "Interactive guitar fretboard",
-    homeButton: "Open Tunings Charts",
+    homeButton: "freternity",
     sectionTunings: "Tunings",
     sectionTuningsHelp: "Switch presets, save your own setups, or type a fresh six-string tuning.",
     presetsLabel: "Presets",
@@ -138,6 +138,8 @@ const I18N = {
     sectionNotesHelp: "Build a custom note filter by hand when you want a specific note collection.",
     sectionDisplayHelp: "Change labels, colors, layout, capo, and export settings.",
     sectionFocusHelp: "Limit the visible area to a hand position or a custom fret range.",
+    mobileRotateLabels: "Rotate labels",
+    mobileRotateLabelsActive: "Reset label rotation",
     noteNamingLabel: "Note labels",
     noteDisplayLabel: "Display mode",
     displayNotes: "Notes",
@@ -352,6 +354,8 @@ const state = {
   fretFocusPosition: 1,
   fretRangeStart: 1,
   fretRangeEnd: 13,
+  mobileLabelRotation: "upright",
+  mobileExpandedCards: [],
   savedTunings: [],
   tuningDraftLabel: defaultTuning.label,
   tuningDraftNotesText: defaultTuning.octaves.join(" "),
@@ -365,6 +369,7 @@ const state = {
 const heroNode = document.querySelector(".hero");
 const controlsNode = document.getElementById("controls");
 const guitarNode = document.getElementById("guitar");
+const mobileRotateButtonNode = document.getElementById("mobile-rotate-button");
 const fretboardPageNode = document.getElementById("fretboard-page") || document.querySelector(".fretboard-page");
 const chordShapeCache = new Map();
 
@@ -522,6 +527,7 @@ function resetAppView() {
   state.fretFocusPosition = 1;
   state.fretRangeStart = 1;
   state.fretRangeEnd = 13;
+  state.mobileLabelRotation = "upright";
   state.savedTunings = preservedSavedTunings;
   state.messageKey = "";
   state.messageType = "";
@@ -626,6 +632,8 @@ function saveState() {
     fretFocusPosition: state.fretFocusPosition,
     fretRangeStart: state.fretRangeStart,
     fretRangeEnd: state.fretRangeEnd,
+    mobileLabelRotation: state.mobileLabelRotation,
+    mobileExpandedCards: state.mobileExpandedCards,
     savedTunings: state.savedTunings,
     tuningDraftLabel: state.tuningDraftLabel,
     tuningDraftNotesText: state.tuningDraftNotesText,
@@ -725,6 +733,14 @@ function applySnapshot(parsed) {
   }
   if (typeof parsed.fretRangeEnd === "number" && parsed.fretRangeEnd >= 1) {
     state.fretRangeEnd = parsed.fretRangeEnd;
+  }
+  if (typeof parsed.mobileLabelRotation === "string" && ["upright", "clockwise"].includes(parsed.mobileLabelRotation)) {
+    state.mobileLabelRotation = parsed.mobileLabelRotation;
+  }
+  if (Array.isArray(parsed.mobileExpandedCards)) {
+    state.mobileExpandedCards = parsed.mobileExpandedCards.filter((value) =>
+      ["chord", "scale", "tuning", "notes", "mode", "focus", "display"].includes(value)
+    );
   }
   if (Array.isArray(parsed.visibleNotes)) {
     state.visibleNotes = parsed.visibleNotes.map((note) => normalizeNoteName(note, state.noteNaming));
@@ -1673,6 +1689,51 @@ function renderHero() {
   renderToast(heroNode.querySelector(".status-toast-wrap"));
 }
 
+function renderMobileRotateButton() {
+  if (!mobileRotateButtonNode) {
+    return;
+  }
+  const isClockwise = state.mobileLabelRotation === "clockwise";
+  mobileRotateButtonNode.classList.toggle("is-active", isClockwise);
+  mobileRotateButtonNode.setAttribute("aria-pressed", String(isClockwise));
+  mobileRotateButtonNode.setAttribute("aria-label", isClockwise ? t("mobileRotateLabelsActive") : t("mobileRotateLabels"));
+  mobileRotateButtonNode.setAttribute("title", isClockwise ? t("mobileRotateLabelsActive") : t("mobileRotateLabels"));
+  mobileRotateButtonNode.innerHTML = `
+    <svg class="mobile-rotate-button__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6l5 5V7a5 5 0 0 1 4.24 2.35 5 5 0 0 1-.73 6.29l1.42 1.41a7 7 0 0 0 .72-9.7Z"></path>
+      <path d="M12 17a5 5 0 0 1-4.24-2.35 5 5 0 0 1 .73-6.29L7.07 6.95a7 7 0 0 0-.72 9.7A7.95 7.95 0 0 0 12 20v3l5-5-5-5v4Z"></path>
+    </svg>
+  `;
+}
+
+function updateMobileRotateButtonPosition() {
+  if (!mobileRotateButtonNode) {
+    return;
+  }
+  if (!isMobileViewport()) {
+    mobileRotateButtonNode.style.removeProperty("top");
+    mobileRotateButtonNode.style.removeProperty("left");
+    return;
+  }
+
+  const guitarWrapNode = mobileRotateButtonNode.parentElement;
+  const nutNode = guitarNode.querySelector(".nut");
+  const fretboardNode = guitarNode.querySelector(".fretboard");
+  if (!guitarWrapNode || !nutNode || !fretboardNode) {
+    return;
+  }
+
+  const wrapRect = guitarWrapNode.getBoundingClientRect();
+  const nutRect = nutNode.getBoundingClientRect();
+  const fretboardRect = fretboardNode.getBoundingClientRect();
+  const buttonWidth = mobileRotateButtonNode.offsetWidth || 36;
+  const topOffset = Math.max(0, Math.round(Math.min(nutRect.top, fretboardRect.top) - wrapRect.top));
+  const leftOffset = Math.max(6, Math.round(nutRect.left - wrapRect.left - buttonWidth - 10));
+
+  mobileRotateButtonNode.style.top = `${topOffset}px`;
+  mobileRotateButtonNode.style.left = `${leftOffset}px`;
+}
+
 function renderToast(targetNode) {
   if (!targetNode) {
     return;
@@ -1703,6 +1764,11 @@ function setupGlobalListeners() {
       state.languageMenuOpen = false;
       render();
     }
+  });
+
+  mobileRotateButtonNode?.addEventListener("click", () => {
+    state.mobileLabelRotation = state.mobileLabelRotation === "clockwise" ? "upright" : "clockwise";
+    render();
   });
 }
 
@@ -1737,6 +1803,59 @@ function buildCardHeader(title, copy) {
 
 function buildSectionLabel(text) {
   return `<div class="control-section-label">${escapeHtml(text)}</div>`;
+}
+
+function isMobileCardExpanded(cardId) {
+  return !isMobileViewport() || state.mobileExpandedCards.includes(cardId);
+}
+
+function toggleMobileCard(cardId) {
+  if (!isMobileViewport()) {
+    return;
+  }
+  if (state.mobileExpandedCards.includes(cardId)) {
+    state.mobileExpandedCards = state.mobileExpandedCards.filter((id) => id !== cardId);
+  } else {
+    state.mobileExpandedCards = [...state.mobileExpandedCards, cardId];
+  }
+  render();
+}
+
+function enhanceMobileCard(cardNode, cardId) {
+  if (!cardNode) {
+    return;
+  }
+
+  cardNode.dataset.mobileCard = cardId;
+  const header = cardNode.querySelector(".control-card-header");
+  if (!header) {
+    return;
+  }
+
+  const body = document.createElement("div");
+  body.className = "control-card-body";
+  const expanded = isMobileCardExpanded(cardId);
+  body.hidden = !expanded;
+
+  while (header.nextSibling) {
+    body.appendChild(header.nextSibling);
+  }
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "control-card-toggle control-card-header";
+  toggle.setAttribute("aria-expanded", String(expanded));
+  toggle.setAttribute("data-card-toggle", cardId);
+  toggle.innerHTML = `
+    <span class="control-card-toggle-copy">
+      ${header.innerHTML}
+    </span>
+    <span class="control-card-toggle-indicator" aria-hidden="true"></span>
+  `;
+  toggle.addEventListener("click", () => toggleMobileCard(cardId));
+
+  header.replaceWith(toggle);
+  cardNode.appendChild(body);
 }
 
 function getFretFocusSummary() {
@@ -1962,6 +2081,14 @@ function renderControls() {
   const rightColumn = document.createElement("div");
   rightColumn.className = "controls-column controls-column--right";
   rightColumn.append(modeCard, focusCard, displayCard);
+
+  enhanceMobileCard(chordCard, "chord");
+  enhanceMobileCard(scaleCard, "scale");
+  enhanceMobileCard(tuningCard, "tuning");
+  enhanceMobileCard(noteCard, "notes");
+  enhanceMobileCard(modeCard, "mode");
+  enhanceMobileCard(focusCard, "focus");
+  enhanceMobileCard(displayCard, "display");
 
   controlsNode.append(mobileTitle, leftColumn, rightColumn, mobileLanguage);
 
@@ -2606,6 +2733,7 @@ function renderGuitar() {
   guitarNode.dataset.inlayStyle = state.inlayStyle;
   guitarNode.dataset.fretLayout = state.fretLayout;
   guitarNode.dataset.capo = String(state.capo);
+  guitarNode.dataset.mobileLabelRotation = state.mobileLabelRotation;
   guitarNode.style.width = state.fretLayout === "real" ? `${(state.scaleLength / 25.5) * 100}%` : "100%";
   guitarNode.innerHTML = "";
 
@@ -2772,6 +2900,7 @@ function buildUrlState() {
   params.set("frets", String(state.fretCount));
   params.set("rangeStart", String(state.fretRangeStart));
   params.set("rangeEnd", String(state.fretRangeEnd));
+  params.set("mobileRotate", state.mobileLabelRotation);
   if (state.highlightMode === "custom") {
     params.set("visible", state.visibleNotes.join(","));
   }
@@ -2821,6 +2950,7 @@ function loadStateFromUrl() {
   if (params.has("frets")) snapshot.fretCount = Number(params.get("frets"));
   if (params.has("rangeStart")) snapshot.fretRangeStart = Number(params.get("rangeStart"));
   if (params.has("rangeEnd")) snapshot.fretRangeEnd = Number(params.get("rangeEnd"));
+  if (params.has("mobileRotate")) snapshot.mobileLabelRotation = params.get("mobileRotate");
   if (params.has("visible")) {
     snapshot.visibleNotes = params.get("visible").split(",").map((value) => value.trim()).filter(Boolean);
   } else if (params.get("highlight") === "custom") {
@@ -2913,7 +3043,9 @@ function render() {
   syncVisibleNotesForMode();
   renderHero();
   renderControls();
+  renderMobileRotateButton();
   renderGuitar();
+  updateMobileRotateButtonPosition();
   syncUrlState();
   saveState();
 }
