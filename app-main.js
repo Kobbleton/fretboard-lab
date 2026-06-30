@@ -129,6 +129,7 @@ const I18N = {
     hideAll: "Hide all",
     showAll: "Show all",
     sectionDisplay: "Display",
+    sectionSettings: "Settings",
     sectionMode: "Highlight mode",
     sectionNotes: "Note highlight",
     sectionScale: "Scale",
@@ -137,6 +138,9 @@ const I18N = {
     sectionModeHelp: "Decide which note set the fretboard should show right now.",
     sectionNotesHelp: "Build a custom note filter by hand when you want a specific note collection.",
     sectionDisplayHelp: "Change labels, colors, layout, capo, and export settings.",
+    sectionSettingsHelp: "Adjust fretboard look, layout, capo, and note presentation in one place.",
+    sectionHelp: "Help",
+    sectionHelpHelp: "Quick notes on what the app does and how to use it fast.",
     sectionFocusHelp: "Limit the visible area to a hand position or a custom fret range.",
     mobileRotateLabels: "Rotate labels",
     mobileRotateLabelsActive: "Reset label rotation",
@@ -167,6 +171,19 @@ const I18N = {
     capoLabel: "Capo",
     capoOff: "Capo Off",
     exportPng: "Export PNG",
+    openSettings: "Settings",
+    closeSettings: "Close settings",
+    openHelp: "?",
+    closeHelp: "Close help",
+    helpIntro: "This is a simple fretboard tool for alternate tunings, scales, chords, capo, and quick neck reference.",
+    helpStep1Title: "1. Start with tuning",
+    helpStep1Body: "Pick a preset or enter your own six-string tuning to rebuild the neck.",
+    helpStep2Title: "2. Choose what to show",
+    helpStep2Body: "Use All, Selected, Scale, or Chord to decide which notes stay visible.",
+    helpStep3Title: "3. Refine the view",
+    helpStep3Body: "Open Settings for labels, inlays, fret count, capo, spacing, and left/right orientation.",
+    helpStep4Title: "4. Save or share",
+    helpStep4Body: "Export PNG for an image, and keep state in the URL for a reusable setup.",
     sectionChord: "Chord",
     chordRootLabel: "Root",
     chordTypeLabel: "Chord type",
@@ -236,9 +253,13 @@ I18N.uk = {
   hideAll: "\u0421\u0445\u043e\u0432\u0430\u0442\u0438 \u0432\u0441\u0435",
   showAll: "\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0432\u0441\u0435",
   sectionDisplay: "\u0412\u0456\u0434\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u043d\u044f",
+  sectionSettings: "\u041d\u0430\u043b\u0430\u0448\u0442\u0443\u0432\u0430\u043d\u043d\u044f",
   sectionMode: "\u0420\u0435\u0436\u0438\u043c \u043f\u0456\u0434\u0441\u0432\u0456\u0442\u043a\u0438",
   sectionNotes: "\u041f\u0456\u0434\u0441\u0432\u0456\u0442\u043a\u0430 \u043d\u043e\u0442",
   sectionScale: "\u0413\u0430\u043c\u0430",
+  sectionSettingsHelp: "\u0417\u0431\u0435\u0440\u0456 \u0432 \u043e\u0434\u043d\u043e\u043c\u0443 \u0432\u0456\u043a\u043d\u0456 \u0432\u0438\u0433\u043b\u044f\u0434 \u0433\u0440\u0438\u0444\u0430, \u043b\u0430\u0434\u0438, \u043a\u0430\u043f\u043e \u0442\u0430 \u043f\u043e\u043a\u0430\u0437 \u043d\u043e\u0442.",
+  sectionHelp: "\u0414\u043e\u0432\u0456\u0434\u043a\u0430",
+  sectionHelpHelp: "\u041a\u043e\u0440\u043e\u0442\u043a\u043e: \u0449\u043e \u0446\u0435 \u0456 \u044f\u043a \u0446\u0438\u043c \u043a\u043e\u0440\u0438\u0441\u0443\u0432\u0430\u0442\u0438\u0441\u044f.",
   noteNamingLabel: "\u041f\u0456\u0434\u043f\u0438\u0441\u0438 \u043d\u043e\u0442",
   noteDisplayLabel: "\u0420\u0435\u0436\u0438\u043c \u043d\u043e\u0442",
   displayNotes: "\u041d\u043e\u0442\u0438",
@@ -251,6 +272,19 @@ I18N.uk = {
   capoLabel: "Capo",
   capoOff: "\u041a\u0430\u043f\u043e \u0432\u0438\u043c\u043a.",
   exportPng: "Export PNG",
+  openSettings: "\u041d\u0430\u043b\u0430\u0448\u0442\u0443\u0432\u0430\u043d\u043d\u044f",
+  closeSettings: "\u0417\u0430\u043a\u0440\u0438\u0442\u0438 \u043d\u0430\u043b\u0430\u0448\u0442\u0443\u0432\u0430\u043d\u043d\u044f",
+  openHelp: "?",
+  closeHelp: "\u0417\u0430\u043a\u0440\u0438\u0442\u0438 \u0434\u043e\u0432\u0456\u0434\u043a\u0443",
+  helpIntro: "\u0426\u0435 \u043f\u0440\u043e\u0441\u0442\u0438\u0439 \u0456\u043d\u0441\u0442\u0440\u0443\u043c\u0435\u043d\u0442 \u0434\u043b\u044f \u0441\u0442\u0440\u043e\u0457\u0432, \u0433\u0430\u043c, \u0430\u043a\u043e\u0440\u0434\u0456\u0432, \u043a\u0430\u043f\u043e \u0442\u0430 \u0448\u0432\u0438\u0434\u043a\u043e\u0457 \u043e\u0440\u0456\u0454\u043d\u0442\u0430\u0446\u0456\u0457 \u043d\u0430 \u0433\u0440\u0438\u0444\u0456.",
+  helpStep1Title: "1. \u041f\u043e\u0447\u043d\u0438 \u0437\u0456 \u0441\u0442\u0440\u043e\u044e",
+  helpStep1Body: "\u041e\u0431\u0435\u0440\u0438 \u043f\u0440\u0435\u0441\u0435\u0442 \u0430\u0431\u043e \u0432\u0432\u0435\u0434\u0438 \u0441\u0432\u0456\u0439 \u0448\u0435\u0441\u0442\u0438\u0441\u0442\u0440\u0443\u043d\u043d\u0438\u0439 \u0441\u0442\u0440\u0456\u0439, \u0456 \u0433\u0440\u0438\u0444 \u043f\u0435\u0440\u0435\u0431\u0443\u0434\u0443\u0454\u0442\u044c\u0441\u044f.",
+  helpStep2Title: "2. \u0412\u0438\u0431\u0435\u0440\u0438, \u0449\u043e \u043f\u043e\u043a\u0430\u0437\u0443\u0432\u0430\u0442\u0438",
+  helpStep2Body: "\u0420\u0435\u0436\u0438\u043c\u0438 All, Selected, Scale \u0456 Chord \u0432\u0438\u0440\u0456\u0448\u0443\u044e\u0442\u044c, \u044f\u043a\u0456 \u043d\u043e\u0442\u0438 \u0437\u0430\u043b\u0438\u0448\u0430\u044e\u0442\u044c\u0441\u044f \u0432\u0438\u0434\u0438\u043c\u0438\u043c\u0438.",
+  helpStep3Title: "3. \u0414\u043e\u043a\u0440\u0443\u0442\u0438 \u0432\u0438\u0433\u043b\u044f\u0434",
+  helpStep3Body: "\u0412\u0456\u0434\u043a\u0440\u0438\u0439 Settings \u0434\u043b\u044f \u043f\u0456\u0434\u043f\u0438\u0441\u0456\u0432, \u0456\u043d\u043b\u0435\u0457\u0432, \u043b\u0430\u0434\u0456\u0432, capo, \u0432\u0456\u0434\u0441\u0442\u0430\u043d\u0435\u0439 \u0456 \u043e\u0440\u0456\u0454\u043d\u0442\u0430\u0446\u0456\u0457.",
+  helpStep4Title: "4. \u0417\u0431\u0435\u0440\u0435\u0436\u0438 \u0430\u0431\u043e \u043f\u043e\u0434\u0456\u043b\u0438\u0441\u044f",
+  helpStep4Body: "Export PNG \u0434\u0430\u0454 \u0433\u043e\u0442\u043e\u0432\u0443 \u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0443, \u0430 \u0441\u0442\u0430\u043d \u0432 URL \u0434\u043e\u0437\u0432\u043e\u043b\u044f\u0454 \u043f\u043e\u0432\u0435\u0440\u043d\u0443\u0442\u0438\u0441\u044f \u0434\u043e \u0442\u043e\u0457 \u0436 \u0441\u0445\u0435\u043c\u0438.",
   namingFlats: "\u266d \u0411\u0435\u043c\u043e\u043b\u0456",
   namingSharps: "\u266f \u0414\u0456\u0454\u0437\u0438",
   highlightAll: "\u0423\u0441\u0456",
@@ -286,9 +320,13 @@ I18N.es = {
   hideAll: "Ocultar todo",
   showAll: "Mostrar todo",
   sectionDisplay: "Visualizaci\u00f3n",
+  sectionSettings: "Ajustes",
   sectionMode: "Modo de resaltado",
   sectionNotes: "Resaltado de notas",
   sectionScale: "Escala",
+  sectionSettingsHelp: "Reune en una sola ventana el aspecto del diapas\u00f3n, los trastes, el capo y la visualizaci\u00f3n de notas.",
+  sectionHelp: "Ayuda",
+  sectionHelpHelp: "Una gu\u00eda breve sobre qu\u00e9 es esto y c\u00f3mo usarlo r\u00e1pido.",
   noteNamingLabel: "Etiquetas de notas",
   noteDisplayLabel: "Modo de vista",
   displayNotes: "Notas",
@@ -301,6 +339,19 @@ I18N.es = {
   capoLabel: "Capo",
   capoOff: "Sin capo",
   exportPng: "Exportar PNG",
+  openSettings: "Ajustes",
+  closeSettings: "Cerrar ajustes",
+  openHelp: "?",
+  closeHelp: "Cerrar ayuda",
+  helpIntro: "Esta es una herramienta simple del diapas\u00f3n para afinaciones alternativas, escalas, acordes, capo y referencia r\u00e1pida del m\u00e1stil.",
+  helpStep1Title: "1. Empieza por la afinaci\u00f3n",
+  helpStep1Body: "Elige un preset o escribe tu propia afinaci\u00f3n de seis cuerdas para reconstruir el m\u00e1stil.",
+  helpStep2Title: "2. Elige qu\u00e9 mostrar",
+  helpStep2Body: "Usa All, Selected, Scale o Chord para decidir qu\u00e9 notas quedan visibles.",
+  helpStep3Title: "3. Ajusta la vista",
+  helpStep3Body: "Abre Ajustes para etiquetas, inlays, trastes, capo, espaciado y orientaci\u00f3n.",
+  helpStep4Title: "4. Guarda o comparte",
+  helpStep4Body: "Exportar PNG crea una imagen, y el estado en la URL te deja volver al mismo setup.",
   namingFlats: "\u266d Bemoles",
   namingSharps: "\u266f Sostenidos",
   highlightAll: "Todas",
@@ -344,6 +395,7 @@ const state = {
   scaleLength: 25.5,
   fretCount: 13,
   capo: 0,
+  activeModal: "",
   highlightMode: "all",
   selectedScaleRoot: "C",
   selectedScaleType: "major",
@@ -1603,6 +1655,28 @@ function createButton({ label, className = "", isActive = false, isDimmed = fals
   return button;
 }
 
+function openModal(modalId) {
+  state.activeModal = modalId;
+  state.languageMenuOpen = false;
+  render();
+}
+
+function openSettingsModal() {
+  openModal("settings");
+}
+
+function openHelpModal() {
+  openModal("help");
+}
+
+function closeSettingsModal() {
+  if (!state.activeModal) {
+    return;
+  }
+  state.activeModal = "";
+  render();
+}
+
 function buildLanguageSwitcher(extraClass = "") {
   const switcher = document.createElement("div");
   switcher.className = `language-switcher${state.languageMenuOpen ? " is-open" : ""}${extraClass ? ` ${extraClass}` : ""}`;
@@ -1676,7 +1750,12 @@ function renderHero() {
   heroNode.innerHTML = `
     <div class="hero-topbar">
       <button type="button" class="eyebrow-button" id="home-button">${escapeHtml(t("homeButton"))}</button>
-      <div class="desktop-language-slot"></div>
+      <div class="hero-actions">
+        <div class="desktop-help-slot"></div>
+        <div class="desktop-export-slot"></div>
+        <div class="desktop-settings-slot"></div>
+        <div class="desktop-language-slot"></div>
+      </div>
     </div>
     <h1 id="hero-title">${escapeHtml(t("heroTitle"))}</h1>
     <div class="status-toast-wrap"></div>
@@ -1685,6 +1764,29 @@ function renderHero() {
     resetAppView();
     render();
   });
+  heroNode.querySelector(".desktop-help-slot")?.appendChild(
+    createButton({
+      label: t("openHelp"),
+      className: "toggle-button toggle-button--quiet settings-launch-button settings-launch-button--icon",
+      onClick: openHelpModal,
+    })
+  );
+  heroNode.querySelector(".desktop-export-slot")?.appendChild(
+    createButton({
+      label: t("exportPng"),
+      className: "toggle-button toggle-button--quiet settings-launch-button",
+      onClick: () => {
+        exportFretboardPng();
+      },
+    })
+  );
+  heroNode.querySelector(".desktop-settings-slot")?.appendChild(
+    createButton({
+      label: t("openSettings"),
+      className: "toggle-button toggle-button--quiet settings-launch-button",
+      onClick: openSettingsModal,
+    })
+  );
   heroNode.querySelector(".desktop-language-slot")?.appendChild(buildLanguageSwitcher("language-switcher--desktop"));
   renderToast(heroNode.querySelector(".status-toast-wrap"));
 }
@@ -1760,7 +1862,14 @@ function setupGlobalListeners() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && state.languageMenuOpen) {
+    if (event.key !== "Escape") {
+      return;
+    }
+    if (state.activeModal) {
+      closeSettingsModal();
+      return;
+    }
+    if (state.languageMenuOpen) {
       state.languageMenuOpen = false;
       render();
     }
@@ -1868,15 +1977,133 @@ function getFretFocusSummary() {
   return t("fretFocusSummaryOff");
 }
 
+function renderSettingsModal() {
+  const wasOpen = document.body.classList.contains("settings-modal-open");
+  document.body.classList.toggle("settings-modal-open", Boolean(state.activeModal));
+  document.body.querySelector(".settings-modal")?.remove();
+
+  if (!state.activeModal) {
+    return null;
+  }
+
+  const isHelpModal = state.activeModal === "help";
+  const modal = document.createElement("div");
+  modal.className = "settings-modal";
+  modal.innerHTML = `
+    <div class="settings-modal__backdrop" data-settings-close="true"></div>
+    <div class="settings-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+      <div class="settings-modal__header">
+        <div class="settings-modal__header-copy">
+          <h2 id="settings-modal-title">${escapeHtml(t(isHelpModal ? "sectionHelp" : "sectionSettings"))}</h2>
+          <p>${escapeHtml(t(isHelpModal ? "sectionHelpHelp" : "sectionSettingsHelp"))}</p>
+        </div>
+        <button type="button" class="settings-modal__close" aria-label="${escapeHtml(
+          t(isHelpModal ? "closeHelp" : "closeSettings")
+        )}">&times;</button>
+      </div>
+      <div class="card-stack settings-modal__content${isHelpModal ? " settings-modal__content--help" : ""}">
+        ${
+          isHelpModal
+            ? `
+        <p class="settings-help-intro">${escapeHtml(t("helpIntro"))}</p>
+        <div class="settings-help-list">
+          <article class="settings-help-item">
+            <h3>${escapeHtml(t("helpStep1Title"))}</h3>
+            <p>${escapeHtml(t("helpStep1Body"))}</p>
+          </article>
+          <article class="settings-help-item">
+            <h3>${escapeHtml(t("helpStep2Title"))}</h3>
+            <p>${escapeHtml(t("helpStep2Body"))}</p>
+          </article>
+          <article class="settings-help-item">
+            <h3>${escapeHtml(t("helpStep3Title"))}</h3>
+            <p>${escapeHtml(t("helpStep3Body"))}</p>
+          </article>
+          <article class="settings-help-item">
+            <h3>${escapeHtml(t("helpStep4Title"))}</h3>
+            <p>${escapeHtml(t("helpStep4Body"))}</p>
+          </article>
+        </div>
+        `
+            : `
+        <div class="display-grid display-grid--compact control-group control-group--primary">
+          <div class="field-row">
+            <span>${escapeHtml(t("noteNamingLabel"))}</span>
+            <div class="toggle-row" id="note-naming-row"></div>
+          </div>
+          <div class="field-row">
+            <span>${escapeHtml(t("noteDisplayLabel"))}</span>
+            <div class="toggle-row" id="note-display-row"></div>
+          </div>
+          <div class="field-row">
+            <span>${escapeHtml(t("noteColorLabel"))}</span>
+            <div class="toggle-row" id="note-color-row"></div>
+          </div>
+          <div class="field-row">
+            <span>${escapeHtml(t("handednessLabel"))}</span>
+            <div class="toggle-row toggle-row--quiet" id="handedness-row"></div>
+          </div>
+        </div>
+        <div class="display-grid display-grid--compact control-group control-group--secondary">
+          <div class="field-row">
+            <span>${escapeHtml(t("inlayStyleLabel"))}</span>
+            <div class="toggle-row toggle-row--quiet" id="inlay-style-row"></div>
+          </div>
+          <div class="field-row">
+            <label for="fret-count">${escapeHtml(t("fretCountLabel"))}</label>
+            <select id="fret-count" name="fret-count"></select>
+          </div>
+          <div class="field-row">
+            <span>${escapeHtml(t("fretLayoutLabel"))}</span>
+            <div class="toggle-row" id="fret-layout-row"></div>
+          </div>
+          <div class="field-row">
+            <label for="scale-length">${escapeHtml(t("scaleLengthLabel"))}</label>
+            <select id="scale-length" name="scale-length">
+              <option value="25.5">${escapeHtml(t("scaleLengthStandard"))}</option>
+              <option value="24.75">${escapeHtml(t("scaleLengthGibson"))}</option>
+              <option value="27">${escapeHtml(t("scaleLengthBaritone"))}</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <label for="capo">${escapeHtml(t("capoLabel"))}</label>
+            <select id="capo" name="capo"></select>
+            <div class="toggle-row toggle-row--quiet" id="capo-actions-row"></div>
+          </div>
+        </div>
+        `
+        }
+      </div>
+    </div>
+  `;
+
+  modal.querySelector("[data-settings-close='true']")?.addEventListener("click", closeSettingsModal);
+  modal.querySelector(".settings-modal__close")?.addEventListener("click", closeSettingsModal);
+  document.body.appendChild(modal);
+  if (!wasOpen) {
+    requestAnimationFrame(() => modal.querySelector(".settings-modal__close")?.focus());
+  }
+  return modal;
+}
+
 function renderControls() {
   controlsNode.innerHTML = "";
   const availableFretCounts = getAvailableFretCounts();
   const renderedFretCount = getRenderableFretCount();
+  const settingsModal = renderSettingsModal();
+  const settingsPanel = state.activeModal === "settings" ? settingsModal?.querySelector(".settings-modal__content") || null : null;
 
   const mobileTitle = document.createElement("section");
   mobileTitle.className = "mobile-hero-title";
   mobileTitle.innerHTML = `
-    <button type="button" class="eyebrow-button" id="mobile-home-button">${escapeHtml(t("homeButton"))}</button>
+    <div class="mobile-hero-title-topbar">
+      <button type="button" class="eyebrow-button" id="mobile-home-button">${escapeHtml(t("homeButton"))}</button>
+      <div class="mobile-top-actions">
+        <div class="mobile-help-slot"></div>
+        <div class="mobile-export-slot"></div>
+        <div class="mobile-settings-slot"></div>
+      </div>
+    </div>
     <h1>${escapeHtml(t("heroTitle"))}</h1>
   `;
 
@@ -1951,16 +2178,6 @@ function renderControls() {
       <div class="field-row field-row--full field-row--actions control-group control-group--utility">
         <div class="toggle-row" id="mode-actions-row"></div>
       </div>
-      <div class="display-grid display-grid--compact control-group control-group--secondary">
-        <div class="field-row">
-          <span>${escapeHtml(t("inlayStyleLabel"))}</span>
-          <div class="toggle-row toggle-row--quiet" id="inlay-style-row"></div>
-        </div>
-        <div class="field-row">
-          <label for="fret-count">${escapeHtml(t("fretCountLabel"))}</label>
-          <select id="fret-count" name="fret-count"></select>
-        </div>
-      </div>
     </div>
   `;
 
@@ -1989,54 +2206,6 @@ function renderControls() {
       </div>
       <div class="field-row field-row--full field-row--actions control-group control-group--utility">
         <div class="toggle-row" id="focus-actions-row"></div>
-      </div>
-    </div>
-  `;
-
-  const displayCard = document.createElement("section");
-  displayCard.className = "control-card control-card--half control-card--display";
-  displayCard.innerHTML = `
-    ${buildCardHeader(t("sectionDisplay"), t("sectionDisplayHelp"))}
-    <div class="card-stack">
-      <div class="display-grid display-grid--compact control-group control-group--primary">
-        <div class="field-row">
-          <span>${escapeHtml(t("noteNamingLabel"))}</span>
-          <div class="toggle-row" id="note-naming-row"></div>
-        </div>
-        <div class="field-row">
-          <span>${escapeHtml(t("noteDisplayLabel"))}</span>
-          <div class="toggle-row" id="note-display-row"></div>
-        </div>
-        <div class="field-row">
-          <span>${escapeHtml(t("noteColorLabel"))}</span>
-          <div class="toggle-row" id="note-color-row"></div>
-        </div>
-      </div>
-      <div class="display-grid display-grid--compact control-group control-group--secondary">
-        <div class="field-row">
-          <span>${escapeHtml(t("handednessLabel"))}</span>
-          <div class="toggle-row toggle-row--quiet" id="handedness-row"></div>
-        </div>
-        <div class="field-row">
-          <span>${escapeHtml(t("fretLayoutLabel"))}</span>
-          <div class="toggle-row" id="fret-layout-row"></div>
-        </div>
-        <div class="field-row">
-          <label for="scale-length">${escapeHtml(t("scaleLengthLabel"))}</label>
-          <select id="scale-length" name="scale-length">
-            <option value="25.5">${escapeHtml(t("scaleLengthStandard"))}</option>
-            <option value="24.75">${escapeHtml(t("scaleLengthGibson"))}</option>
-            <option value="27">${escapeHtml(t("scaleLengthBaritone"))}</option>
-          </select>
-        </div>
-        <div class="field-row">
-          <label for="capo">${escapeHtml(t("capoLabel"))}</label>
-          <select id="capo" name="capo"></select>
-          <div class="toggle-row toggle-row--quiet" id="capo-actions-row"></div>
-        </div>
-      </div>
-      <div class="field-row field-row--full field-row--actions control-group control-group--utility">
-        <div class="toggle-row control-actions-row" id="display-actions-row"></div>
       </div>
     </div>
   `;
@@ -2080,7 +2249,7 @@ function renderControls() {
 
   const rightColumn = document.createElement("div");
   rightColumn.className = "controls-column controls-column--right";
-  rightColumn.append(modeCard, focusCard, displayCard);
+  rightColumn.append(modeCard, focusCard);
 
   enhanceMobileCard(chordCard, "chord");
   enhanceMobileCard(scaleCard, "scale");
@@ -2088,7 +2257,6 @@ function renderControls() {
   enhanceMobileCard(noteCard, "notes");
   enhanceMobileCard(modeCard, "mode");
   enhanceMobileCard(focusCard, "focus");
-  enhanceMobileCard(displayCard, "display");
 
   controlsNode.append(mobileTitle, leftColumn, rightColumn, mobileLanguage);
 
@@ -2096,6 +2264,29 @@ function renderControls() {
     resetAppView();
     render();
   });
+  mobileTitle.querySelector(".mobile-help-slot")?.appendChild(
+    createButton({
+      label: t("openHelp"),
+      className: "toggle-button toggle-button--quiet settings-launch-button settings-launch-button--mobile settings-launch-button--icon",
+      onClick: openHelpModal,
+    })
+  );
+  mobileTitle.querySelector(".mobile-export-slot")?.appendChild(
+    createButton({
+      label: t("exportPng"),
+      className: "toggle-button toggle-button--quiet settings-launch-button settings-launch-button--mobile",
+      onClick: () => {
+        exportFretboardPng();
+      },
+    })
+  );
+  mobileTitle.querySelector(".mobile-settings-slot")?.appendChild(
+    createButton({
+      label: t("openSettings"),
+      className: "toggle-button toggle-button--quiet settings-launch-button settings-launch-button--mobile",
+      onClick: openSettingsModal,
+    })
+  );
 
   const presetRow = tuningCard.querySelector("#preset-tunings");
   PRESET_TUNINGS.forEach((preset) => {
@@ -2198,60 +2389,62 @@ function renderControls() {
     })
   );
 
-  const noteNamingRow = displayCard.querySelector("#note-naming-row");
-  [
-    { id: "flats", label: t("namingFlats") },
-    { id: "sharps", label: t("namingSharps") },
-  ].forEach((mode) => {
-    noteNamingRow.append(
-      createButton({
-        label: mode.label,
-        className: "toggle-button toggle-button--primary",
-        isActive: state.noteNaming === mode.id,
-        onClick: () => {
-          updateNoteNaming(mode.id);
-          setMessage(mode.id === "flats" ? "msgFlats" : "msgSharps", "is-success");
-          render();
-        },
-      })
-    );
-  });
+  if (settingsPanel) {
+    const noteNamingRow = settingsPanel.querySelector("#note-naming-row");
+    [
+      { id: "flats", label: t("namingFlats") },
+      { id: "sharps", label: t("namingSharps") },
+    ].forEach((mode) => {
+      noteNamingRow.append(
+        createButton({
+          label: mode.label,
+          className: "toggle-button toggle-button--primary",
+          isActive: state.noteNaming === mode.id,
+          onClick: () => {
+            updateNoteNaming(mode.id);
+            setMessage(mode.id === "flats" ? "msgFlats" : "msgSharps", "is-success");
+            render();
+          },
+        })
+      );
+    });
 
-  const noteDisplayRow = displayCard.querySelector("#note-display-row");
-  [
-    { id: "notes", label: t("displayNotes") },
-    { id: "intervals", label: t("displayIntervals") },
-  ].forEach((mode) => {
-    noteDisplayRow.append(
-      createButton({
-        label: mode.label,
-        className: "toggle-button toggle-button--primary",
-        isActive: state.noteDisplayMode === mode.id,
-        onClick: () => {
-          state.noteDisplayMode = mode.id;
-          render();
-        },
-      })
-    );
-  });
+    const noteDisplayRow = settingsPanel.querySelector("#note-display-row");
+    [
+      { id: "notes", label: t("displayNotes") },
+      { id: "intervals", label: t("displayIntervals") },
+    ].forEach((mode) => {
+      noteDisplayRow.append(
+        createButton({
+          label: mode.label,
+          className: "toggle-button toggle-button--primary",
+          isActive: state.noteDisplayMode === mode.id,
+          onClick: () => {
+            state.noteDisplayMode = mode.id;
+            render();
+          },
+        })
+      );
+    });
 
-  const noteColorRow = displayCard.querySelector("#note-color-row");
-  [
-    { id: "chromatic", label: t("colorChromatic") },
-    { id: "degree", label: t("colorDegree") },
-  ].forEach((mode) => {
-    noteColorRow.append(
-      createButton({
-        label: mode.label,
-        className: "toggle-button toggle-button--primary",
-        isActive: state.noteColorMode === mode.id,
-        onClick: () => {
-          state.noteColorMode = mode.id;
-          render();
-        },
-      })
-    );
-  });
+    const noteColorRow = settingsPanel.querySelector("#note-color-row");
+    [
+      { id: "chromatic", label: t("colorChromatic") },
+      { id: "degree", label: t("colorDegree") },
+    ].forEach((mode) => {
+      noteColorRow.append(
+        createButton({
+          label: mode.label,
+          className: "toggle-button toggle-button--primary",
+          isActive: state.noteColorMode === mode.id,
+          onClick: () => {
+            state.noteColorMode = mode.id;
+            render();
+          },
+        })
+      );
+    });
+  }
 
   const highlightModeRow = modeCard.querySelector("#highlight-mode-row");
   [
@@ -2297,84 +2490,78 @@ function renderControls() {
     })
   );
 
-  const handednessRow = displayCard.querySelector("#handedness-row");
-  [
-    { id: "right", label: t("handednessRight") },
-    { id: "left", label: t("handednessLeft") },
-  ].forEach((mode) => {
-    handednessRow.append(
-      createButton({
-        label: mode.label,
-        className: "toggle-button toggle-button--quiet",
-        isActive: state.handedness === mode.id,
-        onClick: () => {
-          state.handedness = mode.id;
-          render();
-        },
-      })
-    );
-  });
+  if (settingsPanel) {
+    const handednessRow = settingsPanel.querySelector("#handedness-row");
+    [
+      { id: "right", label: t("handednessRight") },
+      { id: "left", label: t("handednessLeft") },
+    ].forEach((mode) => {
+      handednessRow.append(
+        createButton({
+          label: mode.label,
+          className: "toggle-button toggle-button--quiet",
+          isActive: state.handedness === mode.id,
+          onClick: () => {
+            state.handedness = mode.id;
+            render();
+          },
+        })
+      );
+    });
 
-  const inlayStyleRow = modeCard.querySelector("#inlay-style-row");
-  [
-    { id: "dots", label: t("inlayDots") },
-    { id: "blocks", label: t("inlayBlocks") },
-  ].forEach((mode) => {
-    inlayStyleRow.append(
-      createButton({
-        label: mode.label,
-        className: "toggle-button toggle-button--quiet",
-        isActive: state.inlayStyle === mode.id,
-        onClick: () => {
-          state.inlayStyle = mode.id;
-          render();
-        },
-      })
-    );
-  });
+    const inlayStyleRow = settingsPanel.querySelector("#inlay-style-row");
+    [
+      { id: "dots", label: t("inlayDots") },
+      { id: "blocks", label: t("inlayBlocks") },
+    ].forEach((mode) => {
+      inlayStyleRow.append(
+        createButton({
+          label: mode.label,
+          className: "toggle-button toggle-button--quiet",
+          isActive: state.inlayStyle === mode.id,
+          onClick: () => {
+            state.inlayStyle = mode.id;
+            render();
+          },
+        })
+      );
+    });
 
-  const fretLayoutRow = displayCard.querySelector("#fret-layout-row");
-  [
-    { id: "chart", label: t("fretLayoutChart") },
-    { id: "real", label: t("fretLayoutReal") },
-  ].forEach((mode) => {
-    fretLayoutRow.append(
-      createButton({
-        label: mode.label,
-        className: "toggle-button toggle-button--primary",
-        isActive: state.fretLayout === mode.id,
-        onClick: () => {
-          state.fretLayout = mode.id;
-          render();
-        },
-      })
-    );
-  });
+    const fretLayoutRow = settingsPanel.querySelector("#fret-layout-row");
+    [
+      { id: "chart", label: t("fretLayoutChart") },
+      { id: "real", label: t("fretLayoutReal") },
+    ].forEach((mode) => {
+      fretLayoutRow.append(
+        createButton({
+          label: mode.label,
+          className: "toggle-button toggle-button--primary",
+          isActive: state.fretLayout === mode.id,
+          onClick: () => {
+            state.fretLayout = mode.id;
+            render();
+          },
+        })
+      );
+    });
+  }
 
-  displayCard.querySelector("#display-actions-row").append(
-    createButton({
-      label: t("exportPng"),
-      className: "toggle-button toggle-button--quiet",
-      onClick: () => {
-        exportFretboardPng();
-      },
-    })
-  );
-
-  const fretSelect = modeCard.querySelector("#fret-count");
-  availableFretCounts.forEach((count) => {
-    const option = document.createElement("option");
-    option.value = String(count);
-    option.textContent = String(count);
-    option.selected = count === renderedFretCount;
-    fretSelect.append(option);
-  });
-  fretSelect.value = String(renderedFretCount);
-  fretSelect.addEventListener("change", (event) => {
-    state.fretCount = Number(event.target.value);
-    clampFretRange();
-    render();
-  });
+  if (settingsPanel) {
+    const fretSelect = settingsPanel.querySelector("#fret-count");
+    availableFretCounts.forEach((count) => {
+      const option = document.createElement("option");
+      option.value = String(count);
+      option.textContent = String(count);
+      option.selected = count === renderedFretCount;
+      fretSelect.append(option);
+    });
+    fretSelect.value = String(renderedFretCount);
+    fretSelect.addEventListener("change", (event) => {
+      state.fretCount = Number(event.target.value);
+      clampFretRange();
+      render();
+    });
+  }
 
   const focusModeRow = focusCard.querySelector("#focus-mode-row");
   [
@@ -2454,38 +2641,40 @@ function renderControls() {
     })
   );
 
-  const scaleLengthSelect = displayCard.querySelector("#scale-length");
-  scaleLengthSelect.value = String(state.scaleLength);
-  scaleLengthSelect.addEventListener("change", (event) => {
-    state.scaleLength = Number(event.target.value);
-    render();
-  });
+  if (settingsPanel) {
+    const scaleLengthSelect = settingsPanel.querySelector("#scale-length");
+    scaleLengthSelect.value = String(state.scaleLength);
+    scaleLengthSelect.addEventListener("change", (event) => {
+      state.scaleLength = Number(event.target.value);
+      render();
+    });
 
-  const capoSelect = displayCard.querySelector("#capo");
-  CAPO_OPTIONS.forEach((capo) => {
-    const option = document.createElement("option");
-    option.value = String(capo);
-    option.textContent = String(capo);
-    option.selected = capo === state.capo;
-    capoSelect.append(option);
-  });
-  capoSelect.value = String(state.capo);
-  capoSelect.addEventListener("change", (event) => {
-    state.capo = Number(event.target.value);
-    render();
-  });
+    const capoSelect = settingsPanel.querySelector("#capo");
+    CAPO_OPTIONS.forEach((capo) => {
+      const option = document.createElement("option");
+      option.value = String(capo);
+      option.textContent = String(capo);
+      option.selected = capo === state.capo;
+      capoSelect.append(option);
+    });
+    capoSelect.value = String(state.capo);
+    capoSelect.addEventListener("change", (event) => {
+      state.capo = Number(event.target.value);
+      render();
+    });
 
-  displayCard.querySelector("#capo-actions-row").append(
-    createButton({
-      label: t("capoOff"),
-      className: "toggle-button toggle-button--quiet",
-      isDimmed: state.capo === 0,
-      onClick: () => {
-        state.capo = 0;
-        render();
-      },
-    })
-  );
+    settingsPanel.querySelector("#capo-actions-row").append(
+      createButton({
+        label: t("capoOff"),
+        className: "toggle-button toggle-button--quiet",
+        isDimmed: state.capo === 0,
+        onClick: () => {
+          state.capo = 0;
+          render();
+        },
+      })
+    );
+  }
 
   const noteChipRow = noteCard.querySelector("#note-chip-row");
   getChromaticScale(state.noteNaming).forEach((note) => {

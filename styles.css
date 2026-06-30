@@ -36,6 +36,10 @@ body {
   font-family: var(--font-main);
 }
 
+body.settings-modal-open {
+  overflow: hidden;
+}
+
 button,
 input,
 select {
@@ -46,6 +50,16 @@ select {
   width: 100%;
   margin: 0;
   padding: 24px 12px 64px;
+  transition:
+    filter 0.22s ease,
+    opacity 0.22s ease;
+}
+
+body.settings-modal-open .page-shell {
+  filter: blur(10px);
+  opacity: 0.6;
+  pointer-events: none;
+  user-select: none;
 }
 
 .hero {
@@ -61,6 +75,14 @@ select {
   gap: 16px;
   width: 100%;
   margin-bottom: 12px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .eyebrow {
@@ -142,6 +164,18 @@ select {
   position: relative;
   display: flex;
   justify-content: flex-end;
+}
+
+.settings-launch-button {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.settings-launch-button--icon {
+  min-width: 42px;
+  padding-inline: 0;
+  justify-content: center;
+  font-weight: 700;
 }
 
 .language-trigger,
@@ -289,6 +323,138 @@ select {
 .mobile-language-footer,
 .mobile-rotate-button {
   display: none;
+}
+
+.mobile-hero-title-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mobile-top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.settings-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.settings-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 13, 17, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.settings-modal__dialog {
+  position: relative;
+  width: min(860px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px);
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid rgba(118, 209, 231, 0.18);
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(10, 38, 48, 0.96) 0%, rgba(5, 26, 33, 0.98) 100%);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.42);
+}
+
+.settings-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.settings-modal__header-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-modal__header h2,
+.settings-modal__header p {
+  margin: 0;
+}
+
+.settings-modal__header p {
+  color: var(--muted);
+  max-width: 48ch;
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.settings-modal__close {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(118, 209, 231, 0.22);
+  border-radius: 14px;
+  background: rgba(118, 209, 231, 0.08);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+  transition:
+    transform 0.15s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.settings-modal__close:hover {
+  transform: translateY(-1px);
+}
+
+.settings-modal__content {
+  gap: 16px;
+}
+
+.settings-modal__content--help {
+  gap: 14px;
+}
+
+.settings-help-intro {
+  margin: 0;
+  color: rgba(237, 247, 250, 0.94);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.settings-help-list {
+  display: grid;
+  gap: 12px;
+}
+
+.settings-help-item {
+  padding: 14px 15px;
+  border: 1px solid rgba(118, 209, 231, 0.14);
+  border-radius: 18px;
+  background: rgba(118, 209, 231, 0.05);
+}
+
+.settings-help-item h3,
+.settings-help-item p {
+  margin: 0;
+}
+
+.settings-help-item h3 {
+  margin-bottom: 6px;
+  font-size: 0.98rem;
+}
+
+.settings-help-item p {
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .mobile-rotate-button {
@@ -752,6 +918,11 @@ select {
 .field-row--actions .control-actions-row,
 .field-row--actions .toggle-row {
   margin-top: 0;
+}
+
+.control-group--utility-only {
+  padding-top: 0;
+  border-top: 0;
 }
 
 #mode-actions-row,
@@ -1694,6 +1865,36 @@ select {
 
   .mobile-hero-title .eyebrow-button {
     justify-self: start;
+  }
+
+  .settings-launch-button--mobile {
+    min-height: 38px;
+    padding: 8px 12px;
+  }
+
+  .settings-launch-button--mobile.settings-launch-button--icon {
+    min-width: 38px;
+    padding-inline: 0;
+  }
+
+  .settings-modal {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .settings-modal__dialog {
+    width: min(100%, 720px);
+    max-height: calc(100vh - 12px);
+    padding: 18px 16px;
+    border-radius: 24px 24px 18px 18px;
+  }
+
+  .settings-modal__header {
+    gap: 12px;
+  }
+
+  .settings-modal__header p {
+    max-width: none;
   }
 
   .mobile-language-footer {
